@@ -44,38 +44,49 @@
     // --fs-grid-min-lg: @fs-grid-width-break-lg;
     // --fs-grid-min-xl: @fs-grid-width-break-xl;
 
+  }
+
     //
 
     .@{fs-grid-class-row} {
 
-      &:extend(.fs_grid_row all);
+      // &:extend(.fs_grid_row all);
+      .fs_grid_row;
 
       .@{fs-grid-class-row} {
-        &:extend(.fs_grid_row_row all);
+        // &:extend(.fs_grid_row_row all);
+        .fs_grid_row_row;
       }
 
-      [class*="@{fs-grid-class-cell}"][class*="@{fs-grid-class-contained}"] .@{fs-grid-class-row} {
-        &:extend(.fs_grid_row_row_contained);
+    }
+
+      // [class*="@{fs-grid-class-cell}"][class*="@{fs-grid-class-contained}"] .@{fs-grid-class-row} {
+      [class*="@{fs-grid-class-contained}"] .@{fs-grid-class-row} {
+        // &:extend(.fs_grid_row_row_contained);
+        .fs_grid_row_row_contained;
       }
 
       // !All Cells
       [class*="@{fs-grid-class-cell}"] {
-        &:extend(.fs_grid_cell);
+        // &:extend(.fs_grid_cell);
+        .fs_grid_cell;
       }
 
       // !Padded Cells
       [class*="@{fs-grid-class-cell}"][class*="@{fs-grid-class-padded}"] {
-        &:extend(.fs_grid_cell_padded);
+        // &:extend(.fs_grid_cell_padded);
+        .fs_grid_cell_padded;
       }
 
       // !Contained Cells
       [class*="@{fs-grid-class-cell}"][class*="@{fs-grid-class-contained}"] {
-        &:extend(.fs_grid_cell_contained);
+        // &:extend(.fs_grid_cell_contained);
+        .fs_grid_cell_contained;
       }
 
       // !Pushed Cells
       [class*="@{fs-grid-class-cell}"][class*="-push-"] {
-        .fs_grid_column_pushed_base();
+        .fs_grid_column_pushed_base;
       }
 
       // // !First Cells
@@ -115,55 +126,60 @@
       @media screen and (@fs-grid-mq-min-xl) {
         .fs_grid(@fs-grid-class-xl, @fs-grid-columns-lg);
       }
-    }
+    // }
+
+  .@{fs-grid-class-container} {
 
     // !Full Fluid Grid
     &-fluid .@{fs-grid-class-row} {
-      &:extend(.fs_grid_row_fluid);
+      // &:extend(.fs_grid_row_fluid);
+      .fs_grid_row_fluid;
     }
 
     // !Full Adaptive Grid
     &-adaptive .@{fs-grid-class-row} {
-      &:extend(.fs_grid_row_adaptive);
+      // &:extend(.fs_grid_row_adaptive);
+      .fs_grid_row_adaptive;
     }
   }
+
 }
 
-// !Size Based Mixins
+// // !Size Based Mixins
 
-.fs_row() {
-  &:extend(.fs_grid_row all);
-}
+// .fs_row() {
+//   &:extend(.fs_grid_row all);
+// }
 
-.fs_row_row() {
-  &:extend(.fs_grid_row_row all);
-}
+// .fs_row_row() {
+//   &:extend(.fs_grid_row_row all);
+// }
 
-.fs_row_row_contained() {
-  &:extend(.fs_grid_row_row_contained all);
-}
+// .fs_row_row_contained() {
+//   &:extend(.fs_grid_row_row_contained all);
+// }
 
-.fs_row_fluid() {
-  &:extend(.fs_grid_row_fluid);
-}
+// .fs_row_fluid() {
+//   &:extend(.fs_grid_row_fluid);
+// }
 
-.fs_row_fluid_sm() {
-  &:extend(.fs_grid_row_fluid);
-}
+// .fs_row_fluid_sm() {
+//   &:extend(.fs_grid_row_fluid);
+// }
 
-.fs_cell() {
-  &:extend(.fs_grid_cell);
-}
+// .fs_cell() {
+//   &:extend(.fs_grid_cell);
+// }
 
-.fs_cell_padded() {
-  &:extend(.fs_grid_cell);
-  &:extend(.fs_grid_cell_padded);
-}
+// .fs_cell_padded() {
+//   &:extend(.fs_grid_cell);
+//   &:extend(.fs_grid_cell_padded);
+// }
 
-.fs_cell_contained() {
-  &:extend(.fs_grid_cell);
-  &:extend(.fs_grid_cell_contained);
-}
+// .fs_cell_contained() {
+//   &:extend(.fs_grid_cell);
+//   &:extend(.fs_grid_cell_contained);
+// }
 
 // !Small, 540 (max 740)
 .fs_cell_xs(@count, @total:0) {
