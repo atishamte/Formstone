@@ -20,6 +20,19 @@
     maxWidth: Infinity,
   };
 
+  // Internal
+
+  /**
+   * @private
+   * @description Builds namespace.
+   * @param {String} string - String to namespace
+   * @param {Boolean} prefix - Inlcude library prefix
+   */
+
+  function namespace(string, prefix) {
+    return (prefix === false ? '' : 'fs-') + Namespace + (string !== '' ? '-' + string : '');
+  }
+
   // Private
 
   /**
@@ -34,17 +47,23 @@
       return;
     }
 
+    GUID++
+
     data = Formstone.extend({
-      guid: namespace(String(GUID++).padStart(3, '0')),
+      guid: GUID,
+      guidClass: namespace(String(GUID).padStart(3, '0')),
       enabled: false,
       active: false,
     }, Options, (Formstone.getData(this, 'swapOptions') || {}));
 
+    Formstone.setData(this, Namespace, data);
+
+    data.el = this;
     data.$el = Formstone(this);
     data.target = data.$el.data(namespace('target', false));
     data.$target = Formstone(data.target);
 
-    data.$el.addClass([namespace('element'), data.guid]);
+    data.$el.addClass([namespace('element'), data.guidClass]);
     data.$target.addClass(namespace('target'));
 
     // Media Query support
@@ -58,11 +77,9 @@
     var group = data.$el.data(namespace('group', false));
     data.group = group ? '[data-' + Namespace + '-group="' + group + '"]' : false;
 
-    data.$swaps = Formstone([data.$el.first(), data.$target.first()]);
+    data.$swaps = Formstone([data.el, data.$target.first()]);
 
     data.$el.on('click', onClick);
-
-    Formstone.setData(this, Namespace, data);
   }
 
   /**
@@ -83,29 +100,18 @@
 
       if (Formstone.mediaquery) {
         // Media Query support
-        Formstone.mediaquery('bind', data.guid, data.mq, {
+        Formstone.mediaquery('bind', data.guidClass, data.mq, {
           enter: function() {
-            enable.call(data.$el.first(), true);
+            enable.apply(data.el, [true]);
           },
           leave: function() {
-            disable.call(data.$el.first(), true);
+            disable.apply(data.el, [true]);
           }
         });
       } else {
-        enable.call(this);
+        enable.apply(data.el);
       }
     }
-  }
-
-  /**
-   * @private
-   * @description Builds namespace.
-   * @param {String} string - String to namespace
-   * @param {Boolean} prefix - Inlcude library prefix
-   */
-
-   function namespace(string, prefix) {
-    return (prefix === false ? '' : 'fs-') + Namespace + '-' + string;
   }
 
   /**
@@ -121,9 +127,9 @@
 
     if (data) {
       if (data.active && data.collapse) {
-        deactivate.call(this);
+        deactivate.apply(data.el);
       } else {
-        activate.call(this);
+        activate.apply(data.el);
       }
     }
   }
@@ -148,17 +154,15 @@
    function destroy() {
     var data = Formstone.getData(this, Namespace);
 
-    console.log(data);
-
     if (data) {
       if (Formstone.mediaquery) {
         // Media Query support
-        Formstone.mediaquery('unbind', data.guid);
+        Formstone.mediaquery('unbind', data.guidClass);
       }
 
-      data.$swaps.removeClass([namespace('element'), namespace('target'), namespace('enabled'), namespace('active'), data.guid]).off('click', onClick);
+      data.$swaps.removeClass([namespace('element'), namespace('target'), namespace('enabled'), namespace('active'), data.guidClass]).off('click', onClick);
 
-      Formstone.deleteData(this, Namespace);
+      Formstone.deleteData(data.el, Namespace);
     }
   }
 
@@ -178,7 +182,7 @@
       }
 
       // index in group
-      var index = (data.group) ? Formstone(data.group).nodes.indexOf(data.$el.first()) : null;
+      var index = (data.group) ? Formstone(data.group).nodes.indexOf(data.el) : null;
 
       data.$swaps.addClass(namespace('active'));
 
@@ -243,10 +247,10 @@
 
       if (data.onEnable) {
         data.active = false;
-        activate.call(this);
+        activate.apply(data.el);
       } else {
         data.active = true;
-        deactivate.call(this);
+        deactivate.apply(data.el);
       }
     }
   }
@@ -279,8 +283,8 @@
   Formstone.Component(Namespace, {
     _construct: construct,
     _postConstruct: postConstruct,
-    destroy: destroy,
     defaults: defaults,
+    destroy: destroy,
     activate: activate,
     deactivate: deactivate,
     enable: enable,

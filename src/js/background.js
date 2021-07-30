@@ -1,550 +1,876 @@
-(function(FS) {
+/**
+ * @function
+ * @name Background
+ * @description A javascript plugin full-frame image and video backgrounds.
+ * @param {Object} options - Instance options
+ * @param {Boolean} [options.autoPlay=true] - Autoplay video background
+ * @param {String} [options.customClass=''] - Additional class applied to element
+ * @param {Number} [options.embedRatio=1.777] - Video / embed ratio (16/9)
+ * @param {Boolean} [options.lazy=false] - Lazy load background
+ * @param {Number} [options.lazyEdge=100] - Lazy load edge
+ * @param {Boolean} [options.loop=true] - Loop video background
+ * @param {Boolean} [options.mute=true] - Mute video background
+ * @param {String} [options.source=null] - Source image string
+ * @param {Object} [options.source={}] - Source media object
+ * @example Formstone('.target').background({ ... });
+ */
 
-  "use strict";
+(function(window, Formstone) {
 
-  var FSDOM = FS.dom;
+  'use strict';
 
-  var $Window = FSDOM(window);
-  var $Instances;
-  var $LazyInstances;
+  var Namespace = 'background';
+  var GUID = 0;
 
+  // var $Window = Formstone(window);
+  var $Instances = Formstone();
+  var $LazyInstances = Formstone();
+
+  var Initialized = false;
   var ScrollTop = 0;
-  var Classes = [
-    "container",
-    "media",
-    "animated",
-    "responsive",
-    "native",
-    "fixed",
-    "ready",
-    "lazy"
-  ];
 
-  var Methods = {
-    "publicMethod": publicMethod,
+  var Options = {
+    alt: '',
+    autoPlay: true,
+    customClass: '',
+    embedRatio: 1.777777,
+    lazy: false,
+    lazyEdge: 100,
+    loop: true,
+    mute: true,
+    source: null,
+    youtubeOptions: {} // deprecated
   };
+
+  // Internal
 
   /**
    * @private
-   * @description Setup plugin.
+   * @description Builds namespace.
+   * @param {String} string - String to namespace
+   * @param {Boolean} prefix - Inlcude library prefix
    */
 
-  function setup() {
-    scroll();
-    $Window.on("scroll", scroll);
+  function namespace(string, prefix) {
+    return (prefix === false ? '' : 'fs-') + Namespace + (string !== '' ? '-' + string : '');
   }
 
   /**
    * @private
-   * @description Handles window resize
+   * @description Sets up plugin.
+   */
+
+  function initialize() {
+    if (!Initialized) {
+      window.addEventListener('resize', resize);
+      window.document.addEventListener('scroll', scroll);
+
+      scroll();
+    }
+  }
+
+  /**
+   * @private
+   * @description Handles window resize.
    */
 
   function resize() {
-    // Functions.iterate.call(Instances, resizeInstance);
-    // Functions.iterate.call(LazyInstances, cacheScrollPosition);
-    // Functions.iterate.call(LazyInstances, checkScrollPosition);
+    $Instances.each(function(el, i) {
+      resizeInstance.apply(el);
+    });
+
+    $LazyInstances.each(function(el, i) {
+      cacheScrollPosition.apply(el);
+    }).each(function(el, i) {
+      checkScrollPosition.apply(el);
+    });
   }
 
   /**
    * @method private
    * @name scroll
-   * @description Handles window scroll
+   * @description Handles window scroll.
    */
 
   function scroll() {
-    ScrollTop = FS.scrollTop() + Formstone.windowHeight; // JQ
+    console.log(window.scrollY, window.innerHeight);
+    ScrollTop = window.scrollY + window.innerHeight;
 
     if (ScrollTop < 0) {
       ScrollTop = 0;
     }
 
-    // Functions.iterate.call(LazyInstances, checkScrollPosition);
+    $LazyInstances.each(function(el, i) {
+      console.log('her');
+      checkScrollPosition.apply(el);
+    });
   }
 
   /**
-   * @method private
-   * @name cacheInstances
-   * @description Caches active instances
+   * @private
+   * @description Caches active instances.
    */
 
   function cacheInstances() {
-    $Instances = FS(RawClasses.base);
-    $LazyInstances = FS(RawClasses.lazy);
+    $Instances = Formstone('.' + namespace(''));
+    $LazyInstances = $Instances.filter('.' + namespace('lazy'));
 
-    // Functions.iterate.call(LazyInstances, cacheScrollPosition);
+    console.log(namespace(''), $Instances, $LazyInstances);
+
+    $LazyInstances.each(function(el, i) {
+      cacheScrollPosition.apply(el);
+    });
+  }
+
+  // Private
+
+  /**
+   * @private
+   * @description Builds instance.
+   */
+
+  function construct(data) {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data) {
+      return;
+    }
+
+    initialize();
+
+    GUID++
+
+    data = Formstone.extend({
+      guid: GUID,
+      guidClass: namespace(String(GUID).padStart(3, '0')),
+      enabled: false,
+      active: false,
+    }, Options, (Formstone.getData(this, 'backgroundOptions') || {}));
+
+    Formstone.setData(this, Namespace, data);
+
+    // data.youTubeGuid = 0;
+
+    data.el = this;
+    data.$el = Formstone(this);
+    data.$container = Formstone('<div class="' + namespace('container') + '"></div>');
+
+    data.thisClasses = [namespace(''), data.guidClass, data.customClass]
+    data.visible = true;
+
+    if (data.lazy) {
+      data.visible = false;
+      data.thisClasses.push(namespace('lazy'));
+    }
+
+    data.$el.addClass(data.thisClasses).append(data.$container);
+
+    cacheInstances();
+
+    if (data.lazy) {
+      cacheScrollPosition.apply(data.el);
+      checkScrollPosition.apply(data.el);
+    } else {
+      loadInitialSource.apply(data.el);
+    }
+  }
+
+  /**
+   * @private
+   * @description Cahces target scroll position.
+   */
+
+  function cacheScrollPosition() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data) {
+      var offset = data.$el.size();
+      data.scrollTop = offset.top;
+    }
+  }
+
+  /**
+   * @private
+   * @description Checks target scroll position against window.
+   */
+
+  function checkScrollPosition() {
+    var data = Formstone.getData(this, Namespace);
+
+    console.log(data.scrollTop, ScrollTop + data.lazyEdge);
+
+    if (data && !data.visible && data.scrollTop < ScrollTop + data.lazyEdge) {
+      console.log('visible');
+      data.visible = true;
+      loadInitialSource.apply(data.el);
+    }
+  }
+
+  /**
+   * @private
+   * @description Loads initial source.
+   */
+
+  function loadInitialSource() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data && data.visible) {
+      var source = data.source;
+      data.source = null;
+
+      loadMedia.apply(data.el, [source, true]);
+    }
+  }
+
+  /**
+   * @private
+   * @description Determines responsive source.
+   * @return {String} - New source url
+   */
+
+   function calculateSource() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (!data) {
+      return;
+    }
+
+    var source = data.source;
+
+    if (data.responsive) {
+      source = data.sources[0].url;
+
+      for (var i in data.sources) {
+        if (data.sources.hasOwnProperty(i)) {
+          // if (Formstone.support.matchMedia) {
+            if (data.sources[i].mq.matches) {
+              source = data.sources[i].url;
+            }
+          // } else {
+          //   // Fallback, grab the first breakpoint that's large enough
+          //   if (data.sources[i].width < Formstone.fallbackWidth) {
+          //     source = data.sources[i].url;
+          //   }
+          // }
+        }
+      }
+    }
+
+    return source;
+  }
+
+  /**
+   * @private
+   * @description Loads source image.
+   * @param {String} source - 'Source image'
+   * @param {Boolean} poster - 'Flag for video poster'
+   * @param {Boolean} firstLoad - 'Flag for first load' // TODO should not be documented, use overloaded arguments
+   */
+
+  function loadImage(source, poster, firstLoad) {
+    var data = Formstone.getData(this, Namespace);
+
+    if (!data) {
+      return;
+    }
+
+    var imageClasses = [namespace('media'), namespace('image'), (firstLoad !== true ? namespace('animated') : '')];
+    var $media = Formstone('<div class="' + imageClasses.join(' ') + '" aria-hidden="true"><img alt="' + data.alt + '"></div>');
+    var $img = $media.find('img');
+    var newSource = source;
+
+    // Load image
+    $img.on('load', function() {
+      $media.addClass(namespace('native'));
+      $media.first().style.backgroundImage = "url('" + newSource + "')";
+
+      // // YTransition in
+      $media.first().style.opacity = 1;
+      // $media.css({
+      //   opacity: 1
+      // });
+      // $media.fsTransition({ // JQ
+      //   property: "opacity"
+      // },
+      // function() {
+      //   if (!poster) {
+          cleanMedia.apply(data.el);
+      //   }
+      // }).css({ // JQ
+      //   opacity: 1
+      // });
+
+      doResizeInstance.apply(data.el);
+
+      if (!poster || firstLoad) {
+        data.$el.trigger('loaded');
+      }
+    }).on('error', data, loadError)
+      .attr('src', newSource);
+
+    if (data.responsive) {
+      $media.addClass(namespace('responsive'));
+    }
+
+    data.$container.append($media);
+
+    // Check if image is cached
+    if ($img.first().complete || $img.first().readyState === 4) {
+      $img.trigger('load'); // JQ
+    }
+
+    data.currentSource = newSource;
   }
 
   /**
    * @method private
-   * @name construct
-   * @description Builds instance.
-   * @param data [object] "Instance data"
+   * @name loadVideo
+   * @description Loads source video
+   * @param {String} source - 'Source video'
+   * @param {Boolean} firstLoad - 'Flag for first load'
    */
 
-  function construct(data) {
-    console.log('Construct!', data, arguments);
+  function loadVideo(source, firstLoad) {
+    var data = Formstone.getData(this, Namespace);
 
-
-    //   // guid
-    //   data.youTubeGuid = 0;
-
-    //   // data.$container = $('<div class="' + RawClasses.container + '"></div>').appendTo(this); // JQ
-    //   data.$container = $('<div class="' + RawClasses.container + '"></div>'); // JQ
-
-    //   this[0].appendChild( data.$container[0] ); // JQ
-
-    //   data.thisClasses = [RawClasses.base, data.customClass];
-    //   data.visible = true;
-
-    //   if (data.lazy) {
-    //     data.visible = false;
-    //     data.thisClasses.push(RawClasses.lazy);
-    //   }
-
-    //   this.addClass(data.thisClasses.join(" ")); // JQ
-
-    //   cacheInstances();
-
-    //   if (data.lazy) {
-    //     cacheScrollPosition(data);
-    //     checkScrollPosition(data);
-    //   } else {
-    //     loadInitialSource(data);
-    //   }
-  }
-
-  function publicMethod() {
-    console.log('Public!', arguments);
-  }
-
-  FS.prototype.background = function(method) {
-    console.log('BG');
-
-    var targetMethod = Methods[method];
-    var targetData = arguments;
-
-    if (typeof method === "object" || !method) {
-      targetMethod = construct;
-    } else if (targetMethod && method.indexOf('_') !== 0) {
-      targetData = Array.prototype.slice.call(targetData, 1);
+    if (!data) {
+      return;
     }
 
-    return this.each(function(item, i) {
-      targetMethod.apply(item, targetData);
+    if (data.source && data.source.poster) {
+      loadImage.apply(data.el, [data.source.poster, true, true]);
+
+      firstLoad = false;
+    }
+
+    // if (!Formstone.isMobile) {
+      var videoClasses = [namespace('media'), namespace('video'), (firstLoad !== true ? namespace('animated') : '')];
+      var html = '<div class="' + videoClasses.join(' ') + '" aria-hidden="true">';
+
+      html += '<video playsinline';
+      if (data.loop) {
+        html += ' loop';
+      }
+      if (data.mute) {
+        html += ' muted';
+      }
+      if (data.autoPlay) {
+        html += ' autoplay';
+      }
+      html += '>';
+      if (data.source.webm) {
+        html += '<source src="' + data.source.webm + '" type="video/webm" />';
+      }
+      if (data.source.mp4) {
+        html += '<source src="' + data.source.mp4 + '" type="video/mp4" />';
+      }
+      if (data.source.ogg) {
+        html += '<source src="' + data.source.ogg + '" type="video/ogg" />';
+      }
+      html += '</video>';
+      html += '</div>';
+
+      var $media = Formstone(html);
+      var $video = $media.find('video');
+
+      // $video.one(Events.loadedMetaData, function(e) { // JQ
+      //   $media[0].style.opacity = 1;
+      //   // $media.css({
+      //   //   opacity: 1
+      //   // });
+      //   // $media.fsTransition({ // JQ
+      //   //   property: "opacity"
+      //   // },
+      //   // function() {
+      //     cleanMedia(data);
+      //   // }).css({ // JQ
+      //   //   opacity: 1
+      //   // });
+
+      //   doResizeInstance(data);
+
+      //   data.$el.trigger(Events.loaded); // JQ
+
+      //   // Events
+      //   if (data.autoPlay) {
+      //     playVideo(data);
+      //   }
+      // });
+
+      data.$container.append($media);
+    // }
+  }
+
+  // LOAD YOUTUBE
+
+  /**
+   * @private
+   * @description Cleans up old media.
+   */
+
+  function cleanMedia() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (!data) {
+      return;
+    }
+
+    var $media = data.$container.find('.' + namespace('media'));
+
+    if ($media.nodes.length >= 1) {
+      $media.not(':last-child').remove();
+      data.oldPlayer = null;
+    }
+  }
+
+  /**
+   * @private
+   * @description Error when resource fails to load.
+   */
+
+  function loadError(e) {
+    // var data = e.data;
+
+    // data.$el.trigger(Events.error); // JQ
+  }
+
+  // Public
+
+  /**
+   * @description Sets default options; applies to future instances.
+   * @param {Object} options - Default options
+   * @example Formstone.background('defaults', { ... });
+   */
+
+   function defaults(options) {
+    Options = Formstone.extend({}, Options, options);
+  }
+
+  /**
+   * @private
+   * @description Tears down instance.
+   * @example Formstone('.target').background('destroy');
+   */
+
+  function destroy(data) {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data) {
+      data.$container.remove();
+
+      this.removeClass(data.thisClasses);
+        // .off(Events.namespace); // JQ
+
+      cacheInstances();
+    }
+  }
+
+  /**
+   * @method
+   * @name load
+   * @description Loads source media.
+   * @param {String} [options.source=null] - Source image string
+   * @param {Object} [options.source={}] - Source media object
+   * @example Formstone('.target').background('load', 'path/to/image.jpg');
+   * @example Formstone('.target').background('load', { '0px': 'path/to/image-small.jpg', '980px': 'path/to/image-large.jpg' });
+   * @example Formstone('.target').background('load', { 'poster': 'path/to/image.jpg', 'webm': 'path/to/video.webm', 'mp4': 'path/to/video.mp4', 'ogg': 'path/to/video.ogv' });
+   */
+
+  /**
+   * @private
+   * @description Determines how to handle source media
+   * @param {String} [source=null] - Source image string
+   * @param {Object} [source={}] - Source media object
+   * @param {Boolean} [firstLoad] - Flag for first load
+   */
+
+  function loadMedia(source, firstLoad) {
+    var data = Formstone.getData(this, Namespace);
+
+    if (!data) {
+      return;
+    }
+
+    // Check if the source is new
+    if (source !== data.source && data.visible) {
+      data.source = source;
+      data.responsive = false;
+      data.isYouTube = false;
+
+      // Check YouTube
+      if (Formstone.type(source) === 'object' && Formstone.type(source.video) === 'string') {
+        var parts = source.video.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i);
+
+        if (parts && parts.length >= 1) {
+          data.isYouTube = true;
+          data.videoId = parts[1];
+        }
+      }
+
+      var isVideo = !data.isYouTube && (Formstone.type(source) === 'object' &&
+        (source.hasOwnProperty('mp4') || source.hasOwnProperty('ogg') || source.hasOwnProperty('webm'))
+      );
+
+      data.video = data.isYouTube || isVideo;
+      data.playing = false;
+
+      if (data.isYouTube) {
+        // youtube video
+        data.playerReady = false;
+        data.posterLoaded = false;
+
+        // loadYouTube.apply(this, [source, firstLoad]);
+      } else if (Formstone.type(source) === 'object' && source.hasOwnProperty('poster')) {
+        // html5 video
+        // loadVideo.apply(this, [source, firstLoad]);
+      } else {
+        var newSource = source;
+
+        // Responsive image handling
+        if (Formstone.type(source) === 'object') {
+          var cache = [],
+            keys = [],
+            i;
+
+          for (i in source) {
+            if (source.hasOwnProperty(i)) {
+              keys.push(i);
+            }
+          }
+
+          keys.sort(Formstone.sortAsc);
+
+          for (i in keys) {
+            if (keys.hasOwnProperty(i)) {
+              cache.push({
+                width: parseInt(keys[i]),
+                url: source[keys[i]],
+                mq: window.matchMedia('(min-width: ' + parseInt(keys[i]) + 'px)')
+              });
+            }
+          }
+
+          data.responsive = true;
+          data.sources = cache;
+
+          newSource = calculateSource.apply(data.el);
+        }
+
+        loadImage.apply(data.el, [newSource, false, firstLoad]);
+      }
+    } else {
+      // data.$el.trigger(Events.loaded); // JQ
+    }
+  }
+
+
+  /**
+   * @name unload
+   * @description Unloads current media.
+   * @example Formstone('.target').background('unload');
+   */
+
+  /**
+   * @private
+   * @description Unloads current media.
+   */
+
+  function unloadMedia(data) {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data) {
+      var $media = data.$container.find('.' + namespace('media'));
+
+      if ($media.nodes.length >= 1) {
+        $media.first().style.opacity = 0;
+        // $media.css({
+        //   opacity: 0
+        // });
+        // $media.fsTransition({ // JQ
+        //   property: "opacity"
+        // },
+        // function() {
+          $media.remove();
+
+          delete data.source;
+        // }).css({ // JQ
+        //   opacity: 0
+        // });
+      }
+    }
+  }
+
+  /**
+   * @name pause
+   * @description Pauses target video.
+   * @example Formstone('.target').background('pause');
+   */
+
+  /**
+   * @private
+   * @description Pauses target video.
+   */
+
+  function pauseVideo() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data && data.video && data.playing) {
+      if (data.isYouTube) {
+        if (data.playerReady) {
+          data.player.pauseVideo();
+        } else {
+          data.autoPlay = false;
+        }
+      } else {
+        var $video = data.$container.find('video');
+
+        if ($video) {
+          $video.first().pause();
+        }
+      }
+
+      data.playing = false;
+    }
+  }
+
+  /**
+   * @method
+   * @name play
+   * @description Plays target video.
+   * @example Formstone('.target').background('play');
+   */
+
+  /**
+   * @private
+   * @description Plays target video.
+   */
+
+  function playVideo() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data && data.video && !data.playing) {
+      if (data.isYouTube) {
+        if (data.playerReady) {
+          data.player.playVideo();
+        } else {
+          data.autoPlay = true;
+        }
+      } else {
+        var $video = data.$container.find('video');
+
+        if ($video) {
+          $video.first().play();
+        }
+
+        data.playing = true;
+      }
+    }
+  }
+
+  /**
+   * @name mute
+   * @description Mutes target video.
+   * @example Formstone('.target').background('mute');
+   */
+
+  /**
+   * @private
+   * @description Mutes target video.
+   */
+
+  function muteVideo() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data && data.video) {
+      if (data.isYouTube && data.playerReady) {
+        data.player.mute();
+      } else {
+        var $video = data.$container.find('video');
+
+        if ($video) {
+          $video.first().muted = true;
+        }
+      }
+
+      data.mute = true;
+    }
+  }
+
+  /**
+   * @name unmute
+   * @description Unmutes target video.
+   * @example Formstone('.target').background('unmute');
+   */
+
+  /**
+   * @private
+   * @description Unmutes target video.
+   */
+
+  function unmuteVideo(data) {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data && data.video) {
+      if (data.isYouTube && data.playerReady) {
+        data.player.unMute();
+      } else {
+        var $video = data.$container.find('video');
+
+        if ($video) {
+          $video.first().muted = false;
+        }
+      }
+
+      // data.playing = true;
+      data.mute = false;
+    }
+  }
+
+  /**
+   * @private
+   * @description Handles window resize event.
+   */
+
+  function resizeInstance() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data && data.visible) {
+      if (data.responsive) {
+        var newSource = calculateSource.apply(data.el);
+
+        if (newSource !== data.currentSource) {
+          loadImage.apply(data.el, [newSource, true, true]);
+        } else {
+          doResizeInstance.apply(data.el);
+        }
+      } else {
+        doResizeInstance.apply(data.el);
+      }
+    }
+  }
+
+  /**
+   * @name resize
+   * @description Resizes target instance.
+   * @example Formstone('.target').background('resize');
+   */
+
+  /**
+   * @private
+   * @description Resizes target instance.
+   */
+
+  function doResizeInstance() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (!data) {
+      return;
+    }
+
+    // Target all media
+    var $allMedia = data.$container.find('.' + namespace('media'));
+
+    $allMedia.each(function(el, i) {
+      var $m = Formstone(el);
+      // var type = (data.isYouTube) ? 'iframe' : ($m.find('video').length ? 'video' : 'img');
+      // var media = $m.find(type);
+      var $youTube = $m.find('iframe');
+
+      // TODO: only resize for youtube? img and video natively support object-fit
+
+      // If media found and scaling is not natively support
+      if ($youTube.nodes.length) {
+        var frameWidth = Functions.outerWidth(data.el); // JQ
+        var frameHeight = Functions.outerHeight(data.el); // JQ
+        var frameRatio = frameWidth / frameHeight;
+        var nSize = naturalSize.apply(data.el, [media]); // JQ
+
+        data.width = nSize.width;
+        data.height = nSize.height;
+        data.left = 0;
+        data.top = 0;
+
+        var mediaRatio = (data.isYouTube) ? data.embedRatio : (data.width / data.height);
+
+        // First check the height
+        data.height = frameHeight;
+        data.width = data.height * mediaRatio;
+
+        // Next check the width
+        if (data.width < frameWidth) {
+          data.width = frameWidth;
+          data.height = data.width / mediaRatio;
+        }
+
+        // Position the media
+        data.left = -(data.width - frameWidth) / 2;
+        data.top = -(data.height - frameHeight) / 2;
+
+        var m = $m.first();
+
+        m.style.height = data.height;
+        m.style.width = data.width;
+        m.style.left = data.left;
+        m.style.top = data.top;
+      }
     });
-  };
+  }
 
-})(Formstone);
+  /**
+   * @private
+   * @description Determines natural size of target media.
+   * @param {Object} media - Source media object
+   * @return {Object} - Object containing natural height and width values (or false)
+   */
 
+  function naturalSize(media) {
+    var data = Formstone.getData(this, Namespace);
 
-// (function(root, factory) {
-//   if (typeof define === 'function' && define.amd) {
-//     define([
-//       // 'jQuery',
-//       './core',
-//       // './transition'
-//     ], function(Formstone) {
-//       // return (root.Background = factory(Formstone));
-//       return factory(Formstone);
-//     });
-//   } else if (typeof module == 'object' && module.exports) {
-//     module.exports = factory(require('./core'));
-//   } else {
-//     // window.Background = factory(root.Formstone);
-//     factory(root.Formstone);
-//   }
-// }(typeof self !== 'undefined' ? self : this, function(Formstone) {
+    if (!data) {
+      return;
+    }
 
-//   "use strict";
+    if (data.isYouTube) {
+      return {
+        height: 500,
+        width: 500 / data.embedRatio
+      };
+    } else if (Functions.is(media, "img")) { // JQ
+      return {
+        height: media.naturalHeight,
+        width: media.naturalWidth
+      };
+    } else {
+      return { // TODO deouble check these
+        height: media.videoHeight,
+        width: media.videoWidth
+      };
+    }
+  }
 
-//   // Methods
+  // Component
 
-//   // /**
-//   //  * @method private
-//   //  * @name setup
-//   //  * @description Setup plugin.
-//   //  */
+  Formstone.Component(Namespace, {
+    _construct: construct,
+    defaults: defaults,
+    destroy: destroy,
+    load: loadMedia,
+    unload: unloadMedia,
+    pause: pauseVideo,
+    play: playVideo,
+    mute: muteVideo,
+    unmute: unmuteVideo,
+  });
 
-//   // function setup() {
-//   //   scroll();
-//   //   $Window.on("scroll", scroll); // JQ
-//   // }
+})(window, Formstone);
 
-//   // /**
-//   //  * @method private
-//   //  * @name resize
-//   //  * @description Handles window resize
-//   //  */
 
-//   // function resize() {
-//   //   Functions.iterate.call(Instances, resizeInstance);
-//   //   Functions.iterate.call(LazyInstances, cacheScrollPosition);
-//   //   Functions.iterate.call(LazyInstances, checkScrollPosition);
-//   // }
 
-//   // /**
-//   //  * @method private
-//   //  * @name scroll
-//   //  * @description Handles window scroll
-//   //  */
 
-//   // function scroll() {
-//   //   ScrollTop = Functions.scrollTop() + Formstone.windowHeight; // JQ
 
-//   //   if (ScrollTop < 0) {
-//   //     ScrollTop = 0;
-//   //   }
 
-//   //   Functions.iterate.call(LazyInstances, checkScrollPosition);
-//   // }
 
-//   // /**
-//   //  * @method private
-//   //  * @name cacheInstances
-//   //  * @description Caches active instances
-//   //  */
 
-//   // function cacheInstances() {
-//   //   Instances = document.getElementsByClassName(RawClasses.base);
-//   //   LazyInstances = document.getElementsByClassName(RawClasses.lazy);
-
-//   //   Functions.iterate.call(LazyInstances, cacheScrollPosition);
-//   // }
-
-//   /**
-//    * @method private
-//    * @name construct
-//    * @description Builds instance.
-//    * @param data [object] "Instance data"
-//    */
-
-//   function construct(data) {
-//     console.log(data);
-//   //   // guid
-//   //   data.youTubeGuid = 0;
-
-//   //   // data.$container = $('<div class="' + RawClasses.container + '"></div>').appendTo(this); // JQ
-//   //   data.$container = $('<div class="' + RawClasses.container + '"></div>'); // JQ
-
-//   //   this[0].appendChild( data.$container[0] ); // JQ
-
-//   //   data.thisClasses = [RawClasses.base, data.customClass];
-//   //   data.visible = true;
-
-//   //   if (data.lazy) {
-//   //     data.visible = false;
-//   //     data.thisClasses.push(RawClasses.lazy);
-//   //   }
-
-//   //   this.addClass(data.thisClasses.join(" ")); // JQ
-
-//   //   cacheInstances();
-
-//   //   if (data.lazy) {
-//   //     cacheScrollPosition(data);
-//   //     checkScrollPosition(data);
-//   //   } else {
-//   //     loadInitialSource(data);
-//   //   }
-//   }
-
-//   // /**
-//   //  * @method private
-//   //  * @name destruct
-//   //  * @description Tears down instance.
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // function destruct(data) {
-//   //   data.$container.remove(); // JQ
-
-//   //   this.removeClass(data.thisClasses.join(" ")) // JQ
-//   //     .off(Events.namespace); // JQ
-
-//   //   cacheInstances();
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name loadInitialSource
-//   //  * @description Loads initial source.
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // function loadInitialSource(data) {
-//   //   if (data.visible) {
-//   //     var source = data.source;
-//   //     data.source = null;
-
-//   //     loadMedia(data, source, true);
-//   //   }
-//   // }
-
-//   // /**
-//   //  * @method
-//   //  * @name load
-//   //  * @description Loads source media
-//   //  * @param source [string OR object] "Source image (string or object) or video (object)"
-//   //  * @example $(".target").background("load", "path/to/image.jpg");
-//   //  * @example $(".target").background("load", { "0px": "path/to/image-small.jpg", "980px": "path/to/image-large.jpg" });
-//   //  * @example $(".target").background("load", { "poster": "path/to/image.jpg", "webm": "path/to/video.webm", "mp4": "path/to/video.mp4", "ogg": "path/to/video.ogv" });
-//   //  */
-
-//   // /**
-//   //  * @method private
-//   //  * @name loadMedia
-//   //  * @description Determines how to handle source media
-//   //  * @param data [object] "Instance data"
-//   //  * @param source [string OR object] "Source image (string) or video (object)"
-//   //  * @param firstLoad [boolean] "Flag for first load"
-//   //  */
-
-//   // function loadMedia(data, source, firstLoad) {
-//   //   // Check if the source is new
-//   //   if (source !== data.source && data.visible) {
-//   //     data.source = source;
-//   //     data.responsive = false;
-//   //     data.isYouTube = false;
-
-//   //     // Check YouTube
-//   //     if (Functions.type(source) === "object" && Functions.type(source.video) === "string") {
-//   //       var parts = source.video.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i);
-
-//   //       if (parts && parts.length >= 1) {
-//   //         data.isYouTube = true;
-//   //         data.videoId = parts[1];
-//   //       }
-//   //     }
-
-//   //     var isVideo = !data.isYouTube && (Functions.type(source) === "object" &&
-//   //       (source.hasOwnProperty("mp4") || source.hasOwnProperty("ogg") || source.hasOwnProperty("webm"))
-//   //     );
-
-//   //     data.video = data.isYouTube || isVideo;
-//   //     data.playing = false;
-
-//   //     if (data.isYouTube) {
-//   //       // youtube video
-//   //       data.playerReady = false;
-//   //       data.posterLoaded = false;
-
-//   //       loadYouTube(data, source, firstLoad);
-//   //     } else if (Functions.type(source) === "object" && source.hasOwnProperty("poster")) {
-//   //       // html5 video
-//   //       loadVideo(data, source, firstLoad);
-//   //     } else {
-//   //       var newSource = source;
-
-//   //       // Responsive image handling
-//   //       if (Functions.type(source) === "object") {
-//   //         var cache = [],
-//   //           keys = [],
-//   //           i;
-
-//   //         for (i in source) {
-//   //           if (source.hasOwnProperty(i)) {
-//   //             keys.push(i);
-//   //           }
-//   //         }
-
-//   //         keys.sort(Functions.sortAsc);
-
-//   //         for (i in keys) {
-//   //           if (keys.hasOwnProperty(i)) {
-//   //             cache.push({
-//   //               width: parseInt(keys[i]),
-//   //               url: source[keys[i]],
-//   //               mq: window.matchMedia("(min-width: " + parseInt(keys[i]) + "px)")
-//   //             });
-//   //           }
-//   //         }
-
-//   //         data.responsive = true;
-//   //         data.sources = cache;
-
-//   //         newSource = calculateSource(data);
-//   //       }
-
-//   //       loadImage(data, newSource, false, firstLoad);
-//   //     }
-//   //   } else {
-//   //     data.$el.trigger(Events.loaded); // JQ
-//   //   }
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name calculateSource
-//   //  * @description Determines responsive source
-//   //  * @param data [object] "Instance data"
-//   //  * @return [string] "New source url"
-//   //  */
-
-//   // function calculateSource(data) {
-//   //   var source = data.source;
-
-//   //   if (data.responsive) {
-//   //     source = data.sources[0].url;
-
-//   //     for (var i in data.sources) {
-//   //       if (data.sources.hasOwnProperty(i)) {
-//   //         if (Formstone.support.matchMedia) {
-//   //           if (data.sources[i].mq.matches) {
-//   //             source = data.sources[i].url;
-//   //           }
-//   //         } else {
-//   //           // Fallback, grab the first breakpoint that's large enough
-//   //           if (data.sources[i].width < Formstone.fallbackWidth) {
-//   //             source = data.sources[i].url;
-//   //           }
-//   //         }
-//   //       }
-//   //     }
-//   //   }
-
-//   //   return source;
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name loadImage
-//   //  * @description Loads source image
-//   //  * @param data [object] "Instance data",
-//   //  * @param source [string] "Source image"
-//   //  * @param poster [boolean] "Flag for video poster"
-//   //  * @param firstLoad [boolean] "Flag for first load"
-//   //  */
-
-//   // function loadImage(data, source, poster, firstLoad) {
-//   //   var imageClasses = [RawClasses.media, RawClasses.image, (firstLoad !== true ? RawClasses.animated : '')].join(" "),
-//   //     $media = $('<div class="' + imageClasses + '" aria-hidden="true"><img alt="' + data.alt + '"></div>'), // JQ
-//   //     $img = $($media[0].querySelector("img")), // JQ, TODO
-//   //     newSource = source;
-
-//   //   // Load image
-//   //   $img.one(Events.load, function() { // JQ
-//   //     if (BGSupport) {
-//   //       $media.addClass(RawClasses.native); // JQ
-//   //         // .css({ // JQ
-//   //         //   backgroundImage: "url('" + newSource + "')"
-//   //         // });
-
-//   //       $media[0].style.backgroundImage = "url('" + newSource + "')";
-//   //     }
-
-//   //     // // YTransition in
-//   //     $media[0].style.opacity = 1;
-//   //     // $media.css({
-//   //     //   opacity: 1
-//   //     // });
-//   //     // $media.fsTransition({ // JQ
-//   //     //   property: "opacity"
-//   //     // },
-//   //     // function() {
-//   //     //   if (!poster) {
-//   //         cleanMedia(data);
-//   //     //   }
-//   //     // }).css({ // JQ
-//   //     //   opacity: 1
-//   //     // });
-
-//   //     doResizeInstance(data);
-
-//   //     if (!poster || firstLoad) {
-//   //       data.$el.trigger(Events.loaded); // JQ
-//   //     }
-//   //   }).one(Events.error, data, loadError); // JQ
-//   //     // .attr("src", newSource); // JQ
-
-//   //   $img[0].setAttribute("src", newSource);
-
-//   //   if (data.responsive) {
-//   //     $media.addClass(RawClasses.responsive); // JQ
-//   //   }
-
-//   //   data.$container[0].appendChild( $media[0] ); // JQ
-
-//   //   // Check if image is cached
-//   //   if ($img[0].complete || $img[0].readyState === 4) {
-//   //     $img.trigger(Events.load); // JQ
-//   //   }
-
-//   //   data.currentSource = newSource;
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name loadVideo
-//   //  * @description Loads source video
-//   //  * @param data [object] "Instance data"
-//   //  * @param source [object] "Source video"
-//   //  * @param firstLoad [boolean] "Flag for first load"
-//   //  */
-
-//   // function loadVideo(data, source, firstLoad) {
-//   //   if (data.source && data.source.poster) {
-//   //     loadImage(data, data.source.poster, true, true);
-
-//   //     firstLoad = false;
-//   //   }
-
-//   //   // if (!Formstone.isMobile) {
-//   //     var videoClasses = [RawClasses.media, RawClasses.video, (firstLoad !== true ? RawClasses.animated : '')].join(" "),
-//   //       html = '<div class="' + videoClasses + '" aria-hidden="true">';
-
-//   //     html += '<video playsinline';
-//   //     if (data.loop) {
-//   //       html += ' loop';
-//   //     }
-//   //     if (data.mute) {
-//   //       html += ' muted';
-//   //     }
-//   //     if (data.autoPlay) {
-//   //       html += ' autoplay';
-//   //     }
-//   //     html += '>';
-//   //     if (data.source.webm) {
-//   //       html += '<source src="' + data.source.webm + '" type="video/webm" />';
-//   //     }
-//   //     if (data.source.mp4) {
-//   //       html += '<source src="' + data.source.mp4 + '" type="video/mp4" />';
-//   //     }
-//   //     if (data.source.ogg) {
-//   //       html += '<source src="' + data.source.ogg + '" type="video/ogg" />';
-//   //     }
-//   //     html += '</video>';
-//   //     html += '</div>';
-
-//   //     var $media = $(html), // JQ
-//   //       $video = $($media[0].querySelector("video")); // JQ, TODO
-
-//   //     $video.one(Events.loadedMetaData, function(e) { // JQ
-//   //       $media[0].style.opacity = 1;
-//   //       // $media.css({
-//   //       //   opacity: 1
-//   //       // });
-//   //       // $media.fsTransition({ // JQ
-//   //       //   property: "opacity"
-//   //       // },
-//   //       // function() {
-//   //         cleanMedia(data);
-//   //       // }).css({ // JQ
-//   //       //   opacity: 1
-//   //       // });
-
-//   //       doResizeInstance(data);
-
-//   //       data.$el.trigger(Events.loaded); // JQ
-
-//   //       // Events
-//   //       if (data.autoPlay) {
-//   //         playVideo(data);
-//   //       }
-//   //     });
-
-//   //     data.$container[0].appendChild( $media[0] ); // JQ
-//   //   // }
-//   // }
 
 //   // /**
 //   //  * @method private
@@ -697,622 +1023,3 @@
 //   //     }
 //   //   // }
 //   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name cleanMedia
-//   //  * @description Cleans up old media
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // function cleanMedia(data) {
-//   //   var $media = $(data.$container[0].querySelectorAll(RawClasses.media)); // JQ, TODO
-
-//   //   if ($media.length >= 1) {
-//   //     $media.not(":last").remove(); // JQ
-//   //     data.oldPlayer = null;
-//   //   }
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name loadError
-//   //  * @description Error when resource fails to load.
-//   //  */
-
-//   // function loadError(e) {
-//   //   var data = e.data;
-
-//   //   data.$el.trigger(Events.error); // JQ
-//   // }
-
-//   // /**
-//   //  * @method
-//   //  * @name unload
-//   //  * @description Unloads current media
-//   //  * @example $(".target").background("unload");
-//   //  */
-
-//   // /**
-//   //  * @method private
-//   //  * @name uploadMedia
-//   //  * @description Unloads current media
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // function unloadMedia(data) {
-//   //   var $media = $(data.$container[0].querySelectorAll(Classes.media)); // JQ, TODO
-
-//   //   if ($media.length >= 1) {
-//   //     $media[0].style.opacity = 0;
-//   //     // $media.css({
-//   //     //   opacity: 0
-//   //     // });
-//   //     // $media.fsTransition({ // JQ
-//   //     //   property: "opacity"
-//   //     // },
-//   //     // function() {
-//   //       $media.remove(); // JQ
-//   //       delete data.source;
-//   //     // }).css({ // JQ
-//   //     //   opacity: 0
-//   //     // });
-//   //   }
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name pauseVideo
-//   //  * @description Pauses target video
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // /**
-//   //  * @method
-//   //  * @name pause
-//   //  * @description Pauses target video
-//   //  * @example $(".target").background("pause");
-//   //  */
-
-//   // function pauseVideo(data) {
-//   //   if (data.video && data.playing) {
-//   //     if (data.isYouTube) {
-//   //       if (data.playerReady) {
-//   //         data.player.pauseVideo();
-//   //       } else {
-//   //         data.autoPlay = false;
-//   //       }
-//   //     } else {
-//   //       var video = data.$container[0].querySelector("video"); // JQ
-
-//   //       if (video) {
-//   //         video.pause();
-//   //       }
-//   //     }
-
-//   //     data.playing = false;
-//   //   }
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name playVideo
-//   //  * @description Plays target video
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // /**
-//   //  * @method
-//   //  * @name play
-//   //  * @description Plays target video
-//   //  * @example $(".target").background("play");
-//   //  */
-
-//   // function playVideo(data) {
-//   //   if (data.video && !data.playing) {
-//   //     if (data.isYouTube) {
-//   //       if (data.playerReady) {
-//   //         data.player.playVideo();
-//   //       } else {
-//   //         data.autoPlay = true;
-//   //       }
-//   //     } else {
-//   //       var video = data.$container[0].querySelector("video"); // JQ
-
-//   //       if (video) {
-//   //         video.play();
-//   //       }
-
-//   //       data.playing = true;
-//   //     }
-//   //   }
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name muteVideo
-//   //  * @description Mutes target video
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // /**
-//   //  * @method
-//   //  * @name mute
-//   //  * @description Mutes target video
-//   //  * @example $(".target").background("mute");
-//   //  */
-
-//   // function muteVideo(data) {
-//   //   if (data.video) {
-//   //     if (data.isYouTube && data.playerReady) {
-//   //       data.player.mute();
-//   //     } else {
-//   //       var video = data.$container[0].querySelector("video"); // JQ
-
-//   //       if (video) {
-//   //         video.muted = true;
-//   //       }
-//   //     }
-//   //   }
-
-//   //   data.mute = true;
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name unmuteVideo
-//   //  * @description Unmutes target video
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // /**
-//   //  * @method
-//   //  * @name unmute
-//   //  * @description Unmutes target video
-//   //  * @example $(".target").background("unmute");
-//   //  */
-
-//   // function unmuteVideo(data) {
-//   //   if (data.video) {
-//   //     if (data.isYouTube && data.playerReady) {
-//   //       data.player.unMute();
-//   //     } else {
-//   //       var video = data.$container[0].querySelector("video"); // JQ
-
-//   //       if (video) {
-//   //         video.muted = false;
-//   //       }
-//   //     }
-
-//   //     data.playing = true;
-//   //   }
-
-//   //   data.mute = false;
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name resizeInstance
-//   //  * @description Handle window resize event
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // function resizeInstance(data) {
-//   //   if (data.visible) {
-//   //     if (data.responsive) {
-//   //       var newSource = calculateSource(data);
-
-//   //       if (newSource !== data.currentSource) {
-//   //         loadImage(data, newSource, false, true);
-//   //       } else {
-//   //         doResizeInstance(data);
-//   //       }
-//   //     } else {
-//   //       doResizeInstance(data);
-//   //     }
-//   //   }
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name resize
-//   //  * @description Resize target instance
-//   //  * @example $(".target").background("resize");
-//   //  */
-
-//   // /**
-//   //  * @method private
-//   //  * @name doResizeInstance
-//   //  * @description Resize target instance
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // function doResizeInstance(data) {
-//   //   // Target all media
-//   //   var allMedia = data.$container[0].getElementsByClassName(RawClasses.media);
-
-//   //   for (var i = 0, count = allMedia.length; i < count; i++) {
-//   //     var m = allMedia[i], // JQ
-//   //       type = (data.isYouTube) ? "iframe" : (m.querySelectorAll("video").length ? "video" : "img"), // JQ
-//   //       media = m.querySelector(type); // JQ
-
-//   //     // TODO: only resize for youtube? img and video natively support object-fit
-
-//   //     // If media found and scaling is not natively support
-//   //     if (media && !(type === "img" && BGSupport)) {
-//   //       var frameWidth = Functions.outerWidth(data.el), // JQ
-//   //         frameHeight = Functions.outerHeight(data.el), // JQ
-//   //         frameRatio = frameWidth / frameHeight,
-//   //         nSize = naturalSize(data, media); // JQ
-
-//   //       data.width = nSize.width;
-//   //       data.height = nSize.height;
-//   //       data.left = 0;
-//   //       data.top = 0;
-
-//   //       var mediaRatio = (data.isYouTube) ? data.embedRatio : (data.width / data.height);
-
-//   //       // First check the height
-//   //       data.height = frameHeight;
-//   //       data.width = data.height * mediaRatio;
-
-//   //       // Next check the width
-//   //       if (data.width < frameWidth) {
-//   //         data.width = frameWidth;
-//   //         data.height = data.width / mediaRatio;
-//   //       }
-
-//   //       // Position the media
-//   //       data.left = -(data.width - frameWidth) / 2;
-//   //       data.top = -(data.height - frameHeight) / 2;
-
-//   //       $(m)[0].style.height = data.height;
-//   //       $(m)[0].style.width = data.width;
-//   //       $(m)[0].style.left = data.left;
-//   //       $(m)[0].style.top = data.top;
-
-//   //       // $(m).css({ // JQ
-//   //       //   height: data.height,
-//   //       //   width: data.width,
-//   //       //   left: data.left,
-//   //       //   top: data.top
-//   //       // });
-//   //     }
-//   //   }
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name cacheScrollPosition
-//   //  * @description Cahce target scroll position
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // function cacheScrollPosition(data) {
-//   //   var offset = Functions.offset(data.$el[0]);
-//   //   data.scrollTop = offset.top; // JQ
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name checkScrollPosition
-//   //  * @description Check target scroll position against window
-//   //  * @param data [object] "Instance data"
-//   //  */
-
-//   // function checkScrollPosition(data) {
-//   //   if (!data.visible && data.scrollTop < ScrollTop + data.lazyEdge) {
-//   //     data.visible = true;
-//   //     loadInitialSource(data);
-//   //   }
-//   // }
-
-//   // /**
-//   //  * @method private
-//   //  * @name naturalSize
-//   //  * @description Determines natural size of target media
-//   //  * @param data [object] "Instance data"
-//   //  * @param media [object] "Source media object"
-//   //  * @return [object OR boolean] "Object containing natural height and width values or false"
-//   //  */
-
-//   // function naturalSize(data, media) {
-//   //   if (data.isYouTube) {
-//   //     return {
-//   //       height: 500,
-//   //       width: 500 / data.embedRatio
-//   //     };
-//   //   } else if (Functions.is(media, "img")) { // JQ
-//   //     return {
-//   //       height: media.naturalHeight,
-//   //       width: media.naturalWidth
-//   //     };
-//   //   } else {
-//   //     return { // TODO deouble check these
-//   //       height: media.videoHeight,
-//   //       width: media.videoWidth
-//   //     };
-//   //   }
-//   // }
-
-//   // Internals
-
-//   var namespace = 'background';
-
-//   var defaults = {
-//     alt: "",
-//     autoPlay: true,
-//     customClass: "",
-//     embedRatio: 1.777777,
-//     lazy: false,
-//     lazyEdge: 100,
-//     loop: true,
-//     mute: true,
-//     source: null,
-//     youtubeOptions: {}
-//   };
-
-//   var classes = [
-//     "container",
-//     "media",
-//     "animated",
-//     "responsive",
-//     "native",
-//     "fixed",
-//     "ready",
-//     "lazy"
-//   ];
-
-//   var events = {
-//     loaded: "loaded",
-//     ready: "ready",
-//     loadedMetaData: "loadedmetadata"
-//   };
-
-//   var methods = {
-//     // _construct: construct,
-//     _construct: function() {},
-//     // _destruct: destruct,
-//     // _resize: resize,
-
-//     // play: playVideo,
-//     // pause: pauseVideo,
-//     // mute: muteVideo,
-//     // unmute: unmuteVideo,
-//     // resize: doResizeInstance,
-//     // load: loadMedia,
-//     // unload: unloadMedia
-//   };
-
-//   // Setup
-
-//   var Plugin = Formstone.Plugin(namespace, {
-//     defaults: defaults,
-//     classes: classes,
-//     events: events,
-//     methods: methods,
-//   });
-
-//   // Return
-
-//   return Plugin;
-
-
-
-//   // Formstone.Plugin(namespace, {
-//   //   // widget: true,
-
-//   //   // /**
-//   //   //  * @options
-//   //   //  * @param alt [string] <''> "Image `alt` attribute"
-//   //   //  * @param autoPlay [boolean] <true> "Autoplay video"
-//   //   //  * @param customClass [string] <''> "Class applied to instance"
-//   //   //  * @param embedRatio [number] <1.777777> "Video / embed ratio (16/9)"
-//   //   //  * @param lazy [boolean] <false> "Lazy load with scroll"
-//   //   //  * @param lazyEdge [int] <100> "Lazy load edge"
-//   //   //  * @param loop [boolean] <true> "Loop video"
-//   //   //  * @param mute [boolean] <true> "Mute video"
-//   //   //  * @param source [string OR object] <null> "Source image (string or object) or video (object)"
-//   //   //  */
-//   //   // defaults: {
-//   //   //   alt: "",
-//   //   //   autoPlay: true,
-//   //   //   customClass: "",
-//   //   //   embedRatio: 1.777777,
-//   //   //   lazy: false,
-//   //   //   lazyEdge: 100,
-//   //   //   loop: true,
-//   //   //   mute: true,
-//   //   //   source: null,
-//   //   //   youtubeOptions: {}
-//   //   // },
-
-//   //   // classes: [
-//   //   //   "container",
-//   //   //   "media",
-//   //   //   "animated",
-//   //   //   "responsive",
-//   //   //   "native",
-//   //   //   "fixed",
-//   //   //   "ready",
-//   //   //   "lazy"
-//   //   // ],
-
-//   //   // /**
-//   //   //  * @events
-//   //   //  * @event loaded.background "Background media loaded"
-//   //   //  * @event ready.background "Background media ready"
-//   //   //  * @event error.background "Background media error"
-//   //   //  */
-
-//   //   // events: {
-//   //   //   loaded: "loaded",
-//   //   //   ready: "ready",
-//   //   //   loadedMetaData: "loadedmetadata"
-//   //   // },
-
-//   //   // methods: {
-//   //   //   _construct: construct,
-//   //   //   _destruct: destruct,
-//   //   //   _resize: resize,
-
-//   //   //   play: playVideo,
-//   //   //   pause: pauseVideo,
-//   //   //   mute: muteVideo,
-//   //   //   unmute: unmuteVideo,
-//   //   //   resize: doResizeInstance,
-//   //   //   load: loadMedia,
-//   //   //   unload: unloadMedia
-//   //   // }
-
-//   // });
-
-
-// })
-
-// );
-
-// // /* global define */
-
-// // (function(root, factory) {
-// //   if (typeof define === "function" && define.amd) {
-// //     define([
-// //       // "jQuery",
-// //       "./core",
-// //       // "./transition"
-// //     ], function(Formstone) {
-// //       // return (root.Background = factory(Formstone));
-// //       return factory(Formstone);
-// //     });
-// //   } else if (typeof module == 'object' && module.exports) {
-// //     module.exports = factory(require('./core'));
-// //   } else {
-// //     // window.Background = factory(root.Formstone);
-// //     factory(root.Formstone);
-// //   }
-// // }(typeof self !== 'undefined' ? self : this, function(Formstone) {
-
-
-
-// //   /**
-// //    * @plugin
-// //    * @name Background
-// //    * @description A jQuery plugin for full-frame image and video backgrounds.
-// //    * @type widget
-// //    * @main background.js
-// //    * @main background.css
-// //    * @dependency jQuery
-// //    * @dependency core.js
-// //    * @dependency transition.js
-// //    */
-
-// //   var Plugin = Formstone.Plugin("background", {
-// //       widget: true,
-
-// //       /**
-// //        * @options
-// //        * @param alt [string] <''> "Image `alt` attribute"
-// //        * @param autoPlay [boolean] <true> "Autoplay video"
-// //        * @param customClass [string] <''> "Class applied to instance"
-// //        * @param embedRatio [number] <1.777777> "Video / embed ratio (16/9)"
-// //        * @param lazy [boolean] <false> "Lazy load with scroll"
-// //        * @param lazyEdge [int] <100> "Lazy load edge"
-// //        * @param loop [boolean] <true> "Loop video"
-// //        * @param mute [boolean] <true> "Mute video"
-// //        * @param source [string OR object] <null> "Source image (string or object) or video (object)"
-// //        */
-// //       defaults: {
-// //         alt: "",
-// //         autoPlay: true,
-// //         customClass: "",
-// //         embedRatio: 1.777777,
-// //         lazy: false,
-// //         lazyEdge: 100,
-// //         loop: true,
-// //         mute: true,
-// //         source: null,
-// //         youtubeOptions: {}
-// //       },
-
-// //       classes: [
-// //         "container",
-// //         "media",
-// //         "animated",
-// //         "responsive",
-// //         "native",
-// //         "fixed",
-// //         "ready",
-// //         "lazy"
-// //       ],
-
-// //       /**
-// //        * @events
-// //        * @event loaded.background "Background media loaded"
-// //        * @event ready.background "Background media ready"
-// //        * @event error.background "Background media error"
-// //        */
-
-// //       events: {
-// //         loaded: "loaded",
-// //         ready: "ready",
-// //         loadedMetaData: "loadedmetadata"
-// //       },
-
-// //       methods: {
-// //         _construct: construct,
-// //         _destruct: destruct,
-// //         _resize: resize,
-
-// //         play: playVideo,
-// //         pause: pauseVideo,
-// //         mute: muteVideo,
-// //         unmute: unmuteVideo,
-// //         resize: doResizeInstance,
-// //         load: loadMedia,
-// //         unload: unloadMedia
-// //       }
-// //     }),
-
-// //     // Localize References
-
-// //     Classes = Plugin.classes,
-// //     RawClasses = Classes.raw,
-// //     Events = Plugin.events,
-// //     Functions = Plugin.functions,
-
-// //     // Window = Formstone.window, // TODO
-// //     $Window = Formstone.$window, // JQ
-// //     ScrollTop = 0,
-// //     // $Instances = [], // JQ
-// //     Instances = [],
-// //     // $LazyInstances = [], // JQ
-// //     LazyInstances = [],
-
-// //     BGSupport = ("backgroundSize" in Formstone.document.documentElement.style),
-// //     YouTubeReady = false,
-// //     YouTubeQueue = [];
-
-// //   // Setup
-
-// //   Formstone.Ready(setup);
-
-// //   /**
-// //    * @method private global
-// //    * @name window.onYouTubeIframeAPIReady
-// //    * @description Attaches YouTube players to active instances
-// //    */
-// //   window.onYouTubeIframeAPIReady = function() {
-// //     YouTubeReady = true;
-
-// //     for (var i in YouTubeQueue) {
-// //       if (YouTubeQueue.hasOwnProperty(i)) {
-// //         loadYouTube(YouTubeQueue[i].data, YouTubeQueue[i].source);
-// //       }
-// //     }
-
-// //     YouTubeQueue = [];
-// //   };
-
-// // }) // Factory
-
-// // );

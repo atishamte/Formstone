@@ -8,6 +8,7 @@
     //=include umbrellajs/src/umbrella.js
     //=include umbrellajs/src/plugins/addclass/addclass.js
     //=include umbrellajs/src/plugins/args/args.js
+    //=include umbrellajs/src/plugins/append/append.js
     //=include umbrellajs/src/plugins/array/array.js
     //=include umbrellajs/src/plugins/attr/attr.js
     //=include umbrellajs/src/plugins/adjacent/adjacent.js
@@ -16,6 +17,7 @@
     //=include umbrellajs/src/plugins/each/each.js
     //=include umbrellajs/src/plugins/eacharg/eacharg.js
     //=include umbrellajs/src/plugins/filter/filter.js
+    //=include umbrellajs/src/plugins/find/find.js
     //=include umbrellajs/src/plugins/first/first.js
     //=include umbrellajs/src/plugins/generate/generate.js
     //=include umbrellajs/src/plugins/html/html.js
@@ -27,8 +29,10 @@
     //=include umbrellajs/src/plugins/on/on.js
     //=include umbrellajs/src/plugins/pairs/pairs.js
     //=include umbrellajs/src/plugins/prepend/prepend.js
+    //=include umbrellajs/src/plugins/remove/remove.js
     //=include umbrellajs/src/plugins/removeClass/removeClass.js
     //=include umbrellajs/src/plugins/select/select.js
+    //=include umbrellajs/src/plugins/size/size.js
     //=include umbrellajs/src/plugins/slice/slice.js
     //=include umbrellajs/src/plugins/str/str.js
     //=include umbrellajs/src/plugins/trigger/trigger.js

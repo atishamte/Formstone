@@ -17,7 +17,7 @@
     <script src="/dist/js/core-umbrella.js"></script> -->
     <script src="/dist/js/core.js"></script>
 
-    <!-- <script src="/dist/js/background.js"></script> -->
+    <script src="/dist/js/background.js"></script>
 
     <script src="/dist/js/cookie.js"></script>
     <script src="/dist/js/mediaquery.js"></script>
@@ -309,7 +309,8 @@ Formstone.onReady(function() {
   $(".js-swap").on('activate.swap', function() { console.log('Activate', arguments); });
   $(".js-swap").on('deactivate.swap', function() { console.log('Deactivate', arguments); });
 
-  // console.log(Formstone(".js-background").background());
+
+  Formstone(".js-background").background();
 
   // console.log( Formstone(".js-bg-1").background({ var: 'val' }) );
 

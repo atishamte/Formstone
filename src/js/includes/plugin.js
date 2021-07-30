@@ -12,7 +12,7 @@ Formstone.Component = function(namespace, methods) {
     var targetMethod = methods[method];
     var targetData = arguments;
 
-    if (typeof method === 'object' || !method) {
+    if (Formstone.type(method) === 'object' || !method) {
       targetMethod = methods._construct;
     } else if (targetMethod && method.indexOf('_') !== 0) {
       targetData = Array.prototype.slice.call(targetData, 1);
@@ -64,7 +64,7 @@ Formstone.Utility = function(namespace, methods) {
     var targetMethod = methods[method];
     var targetData = arguments;
 
-    if (typeof method === 'object' || !method) {
+    if (Formstone.type(method) === 'object' || !method) {
       targetMethod = methods._initialize;
     } else if (targetMethod && method.indexOf('_') !== 0) {
       targetData = Array.prototype.slice.call(targetData, 1);
