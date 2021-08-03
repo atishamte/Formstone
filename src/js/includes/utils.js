@@ -29,17 +29,17 @@ Formstone.isEmptyObject = function(obj) {
 };
 
 Formstone.extend = function() {
-  var args = arguments,
-    deep = (args[0] === true),
-    extended = {};
+  var args = arguments;
+  var deep = (args[0] === true);
+  var extended = {};
 
   for (var i = (deep ? 1 : 0); i < args.length; i++) {
     var obj = args[i];
 
     for (var prop in obj) {
       if (obj.hasOwnProperty(prop)) {
-        if (deep && Utils.isObject(obj[prop])) {
-          extended[prop] = Utils.extend(true, extended[prop], obj[prop]);
+        if (deep && Formstone.isObject(obj[prop])) {
+          extended[prop] = Formstone.extend(true, extended[prop], obj[prop]);
         } else {
           extended[prop] = obj[prop];
         }

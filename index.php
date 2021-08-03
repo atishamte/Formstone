@@ -26,6 +26,8 @@
 
     <script src="/dist/js/jquery.js"></script>
 
+    <!-- <script src="//www.youtube.com/iframe_api"></script> -->
+
 
     <style>
 
@@ -231,9 +233,7 @@
     <div class="swap_target toggle_target_8">Content</div>
 
 
-    <!-- <div class="wrapper">
-      <div class="background jq-background jq-bg-1" data-background-options='{"source":"https://spacehold.it/1600x900/1.jpg","alt":"Background Image"}'></div>
-    </div> -->
+
     <div class="wrapper">
       <div class="background js-background js-bg-1" data-background-options='{"source":"https://spacehold.it/1600x900/1.jpg","alt":"Background Image"}'></div>
     </div>
@@ -245,6 +245,9 @@
     </div>
     <div class="wrapper">
       <div class="background js-background js-bg-4" data-background-options='{"source":"https://spacehold.it/1600x900/3.jpg","lazy":true,"alt":"Background Image"}'></div>
+    </div>
+    <div class="wrapper">
+      <div class="background js-background js-bg-4" data-background-options='{"source":{"video":"https://www.youtube.com/watch?v=LlQ8dhdSjWs"},"lazy":true}'></div>
     </div>
 
 
