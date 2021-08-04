@@ -40,7 +40,7 @@
    * @description Builds instance.
    */
 
-  function construct() {
+  function construct(options) {
     var data = Formstone.getData(this, Namespace);
 
     if (data) {
@@ -54,7 +54,7 @@
       guidClass: namespace(String(GUID).padStart(3, '0')),
       enabled: false,
       active: false,
-    }, Options, (Formstone.getData(this, 'swapOptions') || {}));
+    }, Options, options, (Formstone.getData(this, 'swapOptions') || {}));
 
     Formstone.setData(this, Namespace, data);
 

@@ -1,7 +1,7 @@
 /**
  * @function
  * @name Background
- * @description A javascript plugin full-frame image and video backgrounds.
+ * @description A javascript plugin for full-frame image and video backgrounds.
  * @param {Object} options - Instance options
  * @param {Boolean} [options.autoPlay=true] - Autoplay video background
  * @param {String} [options.customClass=''] - Additional class applied to element
@@ -22,13 +22,12 @@
   var Namespace = 'background';
   var GUID = 0;
 
-  var $Instances = Formstone();
-  // var $LazyInstances = Formstone();
+  var Initialized = false;
+  var ResizeWatcher = new ResizeObserver(resize);
   var YouTubeReady = false;
   var YouTubeQueue = [];
 
-  var Initialized = false;
-  var ResizeWatcher = new ResizeObserver(resize);
+  var $Instances = Formstone();
 
   var Options = {
     alt: '',
@@ -79,8 +78,7 @@
   }
 
   /**
-   * @method private
-   * @name scroll
+   * @private
    * @description Handles instance visibilty changes.
    */
 
@@ -92,6 +90,15 @@
     });
   }
 
+  /**
+   * @private
+   * @description Caches internal instances.
+   */
+
+  function cacheInstances() {
+    $Instances = Formstone('.' + namespace(''));
+  }
+
   // Private
 
   /**
@@ -99,7 +106,7 @@
    * @description Builds instance.
    */
 
-  function construct(data) {
+  function construct(options) {
     var data = Formstone.getData(this, Namespace);
 
     if (data) {
@@ -108,17 +115,16 @@
 
     initialize();
 
-    GUID++
+    GUID++;
 
     data = Formstone.extend({
       guid: GUID,
       guidClass: namespace(String(GUID).padStart(3, '0')),
       enabled: false,
       active: false,
-    }, Options, (Formstone.getData(this, 'backgroundOptions') || {}));
+    }, Options, options, (Formstone.getData(this, 'backgroundOptions') || {}));
 
     Formstone.setData(this, Namespace, data);
-
 
     data.el = this;
     data.$el = Formstone(this);
@@ -147,7 +153,7 @@
       data.scrollWatcher.observe(data.el);
     }
 
-    $Instances = Formstone('.' + namespace(''));
+    cacheInstances();
   }
 
   /**
@@ -191,7 +197,7 @@
    * @return {String} - New source url
    */
 
-   function calculateSource() {
+  function calculateSource() {
     var data = Formstone.getData(this, Namespace);
 
     if (!data) {
@@ -560,16 +566,19 @@
    * @example Formstone('.target').background('destroy');
    */
 
-  function destroy(data) {
+  function destroy() {
     var data = Formstone.getData(this, Namespace);
 
     if (data) {
       data.$container.remove();
 
-      this.removeClass(data.thisClasses);
+      data.$el.removeClass(data.thisClasses);
         // .off(Events.namespace); // JQ
 
-      cacheInstances();
+      data.scrollWatcher.disconnect();
+      data.scrollWatcher = null;
+
+      cacheInstance();
     }
   }
 

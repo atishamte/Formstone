@@ -10,6 +10,7 @@
 
     <link rel="stylesheet" href="/dist/css/grid.css">
     <link rel="stylesheet" href="/dist/css/background.css">
+    <link rel="stylesheet" href="/dist/css/checkpoint.css">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -17,11 +18,11 @@
     <script src="/dist/js/core-umbrella.js"></script> -->
     <script src="/dist/js/core.js"></script>
 
-    <script src="/dist/js/background.js"></script>
-
     <script src="/dist/js/cookie.js"></script>
     <script src="/dist/js/mediaquery.js"></script>
 
+    <script src="/dist/js/background.js"></script>
+    <script src="/dist/js/checkpoint.js"></script>
     <script src="/dist/js/swap.js"></script>
 
     <script src="/dist/js/jquery.js"></script>
@@ -424,6 +425,161 @@ Formstone.onReady(function() {
 
     </script>
 
+
+
+<style>
+  .check_container { background: #f9f9f9; overflow: hidden; }
+  .spacer { margin: 100px auto; border: 1px solid #eee; border-radius: 3px; height: 202px; width: 302px; }
+  .checkpoint { background: #00bcd4; border-radius: 3px; color: #fff; height: 200px; line-height: 200px; margin: 0 auto; text-align: center; width: 300px; }
+
+  @media screen and (min-width: 980px) {
+    .spacer { margin: 200px auto; }
+  }
+
+  @media screen and (min-width: 1220px) {
+    .spacer { margin: 300px auto; }
+  }
+
+  .marker {
+    position: fixed;
+    /*top: 50%;*/
+    right: 0;
+    left: 0;
+
+    width: 100%;
+    height: 1px;
+
+    background: red;
+    opacity: 0.5;
+  }
+
+  .container_example { padding: 100px 0; }
+  .container_example_spacer { margin: 0 auto; }
+
+  @media screen and (min-width: 980px) {
+    .container_example { padding: 200px 0; }
+    .container_example_spacer { margin: 0 auto; }
+  }
+
+  @media screen and (min-width: 1220px) {
+    .container_example { padding: 300px 0; }
+    .container_example_spacer { margin: 0 auto; }
+  }
+
+  .demo_parent {
+    position: relative;
+    height: 300px;
+    background: #eee;
+    overflow-y: scroll;
+  }
+  .demo_parent .spacer {
+    margin-top: 500px;
+  }
+</style>
+
+<!-- <div class="marker" style="top: 100px;"></div>
+<div class="marker" style="top: 50%;"></div>
+<div class="marker" style="bottom: 100px;"></div> -->
+
+<script>
+Formstone.onReady(function() {
+  // $(".checkpoint").on("activate.checkpoint", function() {
+  //   console.log("activate", this);
+  // }).on("deactivate.checkpoint", function() {
+  //   console.log("deactivate", this);
+  // });
+
+  Formstone(".demo-checkpoint").checkpoint({
+    offset: 0,
+    intersect: 'middle-top',
+    reverse: true
+  });
+
+  // Formstone("body").find(".js-demo_tabs").on("update.tabs", function() {
+  //   Formstone(".demo-checkpoint").checkpoint("resize");
+  // });
+});
+</script>
+
+<div class="marker" style="top: 100px;"></div>
+<div class="marker" style="top: 50%;"></div>
+<div class="marker" style="bottom: 100px;"></div>
+
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="fade-up">Fade Up</div>
+</div>
+
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="fade-up" data-checkpoint-offset="100" data-checkpoint-intersect="bottom-bottom">Fade Up</div>
+</div>
+
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="fade-up">Fade Up</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="fade-down">Fade Down</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="fade-left">Fade Left</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="fade-right">Fade Right</div>
+</div>
+
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="zoom-in">Zoom In</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="zoom-in-up">Zoom In Up</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="zoom-in-down">Zoom In Down</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="zoom-in-left">Zoom In Left</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="zoom-in-right">Zoom In Right</div>
+</div>
+
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="zoom-out">Zoom Out</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="zoom-out-up">Zoom Out Up</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="zoom-out-down">Zoom Out Down</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="zoom-out-left">Zoom Out Left</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="zoom-out-right">Zoom Out Right</div>
+</div>
+
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="flip-up">Flip Up</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="flip-down">Flip Down</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="flip-left">Flip Left</div>
+</div>
+<div class="spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="flip-right">Flip Right</div>
+</div>
+
+<div class="spacer container_example_spacer">
+  <div class="checkpoint demo-checkpoint" data-checkpoint-animation="fade-up" data-checkpoint-container=".container_example">Fade Up</div>
+</div>
+
+<div class="demo_example demo_parent">
+  <div class="spacer">
+    <div class="checkpoint demo-checkpoint" data-checkpoint-animation="fade-up" data-checkpoint-parent=".demo_parent">Fade Up</div>
+  </div>
+</div>
 
 
 <!-- Grid -->
