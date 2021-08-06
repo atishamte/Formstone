@@ -12,6 +12,7 @@
  * @param {Boolean} [options.mute=true] - Mute video background
  * @param {String} [options.source=null] - Source image string
  * @param {Object} [options.source={}] - Source media object
+ * @requires module:transition
  * @example Formstone('.target').background({ ... });
  */
 

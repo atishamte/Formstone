@@ -30,6 +30,11 @@
     reverse: false,
   };
 
+  var Classes = {
+    base: namespace(''),
+    active: namespace('active'),
+  };
+
   // Internal
 
   /**
@@ -181,7 +186,7 @@
     //   $images.on(Events.load, data, resizeInstance);
     // }
 
-    data.$el.addClass(namespace(''));
+    data.$el.addClass(Classes.base);
 
     data.initialized = true;
 
@@ -229,7 +234,7 @@
       }
 
       data.active = true;
-      data.$el.addClass(namespace('active'));
+      data.$el.addClass(Classes.active);
     } else {
       if (data.reverse) {
         if (data.active) {
@@ -237,7 +242,7 @@
         }
 
         data.active = false;
-        data.$el.removeClass(namespace('active'));
+        data.$el.removeClass(Classes.active);
       }
     }
   }

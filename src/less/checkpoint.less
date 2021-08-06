@@ -1,11 +1,32 @@
-/**
- * @component
- * @name Checkpoint
+/*
+
+.fs-checkpoint // checkpoint element
+.fs-checkpoint.fs-checkpoint-active // animation active
+
+.fs-checkpoint[data-checkpoint-animation="fade-in"] // fade in animation
+.fs-checkpoint[data-checkpoint-animation="fade-up"] // fade up animation
+.fs-checkpoint[data-checkpoint-animation="fade-down"] // fade down animation
+.fs-checkpoint[data-checkpoint-animation="fade-left"] // fade left animation
+.fs-checkpoint[data-checkpoint-animation="fade-right"] // fade right animation
+
+.fs-checkpoint[data-checkpoint-animation="zoom-in"] // zoom in animation
+.fs-checkpoint[data-checkpoint-animation="zoom-in-up"] // zoom in up animation
+.fs-checkpoint[data-checkpoint-animation="zoom-in-down"] // zoom in down animation
+.fs-checkpoint[data-checkpoint-animation="zoom-in-left"] // zoom in left animation
+.fs-checkpoint[data-checkpoint-animation="zoom-in-right"] // zoom in right animation
+
+.fs-checkpoint[data-checkpoint-animation="zoom-out"] // zoom out animation
+.fs-checkpoint[data-checkpoint-animation="zoom-out-up"] // zoom out up animation
+.fs-checkpoint[data-checkpoint-animation="zoom-out-down"] // zoom out down animation
+.fs-checkpoint[data-checkpoint-animation="zoom-out-left"] // zoom out left animation
+.fs-checkpoint[data-checkpoint-animation="zoom-out-right"] // zoom out right animation
+
+.fs-checkpoint[data-checkpoint-animation="flip-up"] // flip up animation
+.fs-checkpoint[data-checkpoint-animation="flip-down"] // flip down animation
+.fs-checkpoint[data-checkpoint-animation="flip-left"] // flip left animation
+.fs-checkpoint[data-checkpoint-animation="flip-right"] // flip right animation
+
  */
-
-@import "imports/utils.less";
-
-// Config
 
 @fs-checkpoint-offset: 50px;
 @fs-checkpoint-duration: 0.5s;
@@ -14,10 +35,15 @@
 @fs-checkpoint-rotate: 91deg;
 @fs-checkpoint-perspective: 3000px;
 
-
 .fs-checkpoint {
+  --fs-checkpoint-offset: @fs-checkpoint-offset;
+  --fs-checkpoint-duration: @fs-checkpoint-duration;
+  --fs-checkpoint-scale-in: @fs-checkpoint-scale-in;
+  --fs-checkpoint-scale-out: @fs-checkpoint-scale-out;
+  --fs-checkpoint-rotate: @fs-checkpoint-rotate;
+  --fs-checkpoint-perspective: @fs-checkpoint-perspective;
 
-  // FADE
+  // Fade
 
   &[data-checkpoint-animation="fade-in"],
   &[data-checkpoint-animation="fade-up"],
@@ -26,8 +52,8 @@
   &[data-checkpoint-animation="fade-right"] {
     opacity: 0;
     transition:
-      opacity @fs-checkpoint-duration linear,
-      transform @fs-checkpoint-duration ease;
+      opacity var(--fs-checkpoint-duration) linear,
+      transform var(--fs-checkpoint-duration) ease;
 
     &.fs-checkpoint-active {
       opacity: 1;
@@ -35,11 +61,11 @@
   }
 
   &[data-checkpoint-animation="fade-up"] {
-    transform: translateY(@fs-checkpoint-offset);
+    transform: translateY(var(--fs-checkpoint-offset));
   }
 
   &[data-checkpoint-animation="fade-down"] {
-    transform: translateY(-@fs-checkpoint-offset);
+    transform: translateY(calc(var(--fs-checkpoint-offset) * -1));
   }
 
   &[data-checkpoint-animation="fade-up"],
@@ -51,11 +77,11 @@
   }
 
   &[data-checkpoint-animation="fade-left"] {
-    transform: translateX(-@fs-checkpoint-offset);
+    transform: translateX(calc(var(--fs-checkpoint-offset) * -1));
   }
 
   &[data-checkpoint-animation="fade-right"] {
-    transform: translateX(@fs-checkpoint-offset);
+    transform: translateX(var(--fs-checkpoint-offset));
   }
 
   &[data-checkpoint-animation="fade-left"],
@@ -66,7 +92,7 @@
     }
   }
 
-  // ZOOM IN
+  // Zoom In
 
   &[data-checkpoint-animation="zoom-in"],
   &[data-checkpoint-animation="zoom-in-up"],
@@ -75,8 +101,8 @@
   &[data-checkpoint-animation="zoom-in-right"] {
     opacity: 0;
     transition:
-      opacity @fs-checkpoint-duration linear,
-      transform @fs-checkpoint-duration ease;
+      opacity var(--fs-checkpoint-duration) linear,
+      transform var(--fs-checkpoint-duration) ease;
 
     &.fs-checkpoint-active {
       opacity: 1;
@@ -84,15 +110,15 @@
   }
 
   &[data-checkpoint-animation="zoom-in"] {
-    transform: translateY(0) scale(@fs-checkpoint-scale-in);
+    transform: translateY(0) scale(var(--fs-checkpoint-scale-in));
   }
 
   &[data-checkpoint-animation="zoom-in-up"] {
-    transform: translateY(@fs-checkpoint-offset) scale(@fs-checkpoint-scale-in);
+    transform: translateY(var(--fs-checkpoint-offset)) scale(var(--fs-checkpoint-scale-in));
   }
 
   &[data-checkpoint-animation="zoom-in-down"] {
-    transform: translateY(-@fs-checkpoint-offset) scale(@fs-checkpoint-scale-in);
+    transform: translateY(calc(var(--fs-checkpoint-offset) * -1)) scale(var(--fs-checkpoint-scale-in));
   }
 
   &[data-checkpoint-animation="zoom-in"],
@@ -105,11 +131,11 @@
   }
 
   &[data-checkpoint-animation="zoom-in-left"] {
-    transform: translateX(-@fs-checkpoint-offset) scale(@fs-checkpoint-scale-in);
+    transform: translateX(calc(var(--fs-checkpoint-offset) * -1)) scale(var(--fs-checkpoint-scale-in));
   }
 
   &[data-checkpoint-animation="zoom-in-right"] {
-    transform: translateX(@fs-checkpoint-offset) scale(@fs-checkpoint-scale-in);
+    transform: translateX(var(--fs-checkpoint-offset)) scale(var(--fs-checkpoint-scale-in));
   }
 
   &[data-checkpoint-animation="zoom-in-left"],
@@ -120,7 +146,7 @@
     }
   }
 
-  // ZOOM OUT
+  // Zoom Out
 
   &[data-checkpoint-animation="zoom-out"],
   &[data-checkpoint-animation="zoom-out-up"],
@@ -129,8 +155,8 @@
   &[data-checkpoint-animation="zoom-out-right"] {
     opacity: 0;
     transition:
-      opacity @fs-checkpoint-duration linear,
-      transform @fs-checkpoint-duration ease;
+      opacity var(--fs-checkpoint-duration) linear,
+      transform var(--fs-checkpoint-duration) ease;
 
     &.fs-checkpoint-active {
       opacity: 1;
@@ -138,15 +164,15 @@
   }
 
   &[data-checkpoint-animation="zoom-out"] {
-    transform: translateY(0) scale(@fs-checkpoint-scale-out);
+    transform: translateY(0) scale(var(--fs-checkpoint-scale-out));
   }
 
   &[data-checkpoint-animation="zoom-out-up"] {
-    transform: translateY(@fs-checkpoint-offset) scale(@fs-checkpoint-scale-out);
+    transform: translateY(var(--fs-checkpoint-offset)) scale(var(--fs-checkpoint-scale-out));
   }
 
   &[data-checkpoint-animation="zoom-out-down"] {
-    transform: translateY(-@fs-checkpoint-offset) scale(@fs-checkpoint-scale-out);
+    transform: translateY(calc(var(--fs-checkpoint-offset) * -1)) scale(var(--fs-checkpoint-scale-out));
   }
 
   &[data-checkpoint-animation="zoom-out"],
@@ -159,11 +185,11 @@
   }
 
   &[data-checkpoint-animation="zoom-out-left"] {
-    transform: translateX(-@fs-checkpoint-offset) scale(@fs-checkpoint-scale-out);
+    transform: translateX(calc(var(--fs-checkpoint-offset) * -1)) scale(var(--fs-checkpoint-scale-out));
   }
 
   &[data-checkpoint-animation="zoom-out-right"] {
-    transform: translateX(@fs-checkpoint-offset) scale(@fs-checkpoint-scale-out);
+    transform: translateX(var(--fs-checkpoint-offset)) scale(var(--fs-checkpoint-scale-out));
   }
 
   &[data-checkpoint-animation="zoom-out-left"],
@@ -174,7 +200,7 @@
     }
   }
 
-  // FLIP
+  // Flip
 
   &[data-checkpoint-animation="flip-up"],
   &[data-checkpoint-animation="flip-down"],
@@ -182,39 +208,39 @@
   &[data-checkpoint-animation="flip-right"] {
     backface-visibility: hidden;
     transition:
-      opacity @fs-checkpoint-duration linear,
-      transform @fs-checkpoint-duration ease;
+      opacity var(--fs-checkpoint-duration) linear,
+      transform var(--fs-checkpoint-duration) ease;
   }
 
   &[data-checkpoint-animation="flip-up"] {
-    transform: perspective(@fs-checkpoint-perspective) rotateX(-@fs-checkpoint-rotate);
+    transform: perspective(var(--fs-checkpoint-perspective)) rotateX(calc(var(--fs-checkpoint-rotate) * -1));
   }
 
   &[data-checkpoint-animation="flip-down"] {
-    transform: perspective(@fs-checkpoint-perspective) rotateX(@fs-checkpoint-rotate);
+    transform: perspective(var(--fs-checkpoint-perspective)) rotateX(var(--fs-checkpoint-rotate));
   }
 
   &[data-checkpoint-animation="flip-up"],
   &[data-checkpoint-animation="flip-down"] {
 
     &.fs-checkpoint-active {
-      transform: perspective(@fs-checkpoint-perspective) rotateX(0);
+      transform: perspective(var(--fs-checkpoint-perspective)) rotateX(0);
     }
   }
 
   &[data-checkpoint-animation="flip-left"] {
-    transform: perspective(@fs-checkpoint-perspective) rotateY(@fs-checkpoint-rotate);
+    transform: perspective(var(--fs-checkpoint-perspective)) rotateY(var(--fs-checkpoint-rotate));
   }
 
   &[data-checkpoint-animation="flip-right"] {
-    transform: perspective(@fs-checkpoint-perspective) rotateY(-@fs-checkpoint-rotate);
+    transform: perspective(var(--fs-checkpoint-perspective)) rotateY(calc(var(--fs-checkpoint-rotate) * -1));
   }
 
   &[data-checkpoint-animation="flip-left"],
   &[data-checkpoint-animation="flip-right"] {
 
     &.fs-checkpoint-active {
-      transform: perspective(@fs-checkpoint-perspective) rotateY(0);
+      transform: perspective(var(--fs-checkpoint-perspective)) rotateY(0);
     }
   }
 

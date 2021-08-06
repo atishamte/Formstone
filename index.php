@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/dist/css/grid.css">
     <link rel="stylesheet" href="/dist/css/background.css">
     <link rel="stylesheet" href="/dist/css/checkpoint.css">
+    <link rel="stylesheet" href="/dist/css/tabs.css">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -24,6 +25,7 @@
     <script src="/dist/js/background.js"></script>
     <script src="/dist/js/checkpoint.js"></script>
     <script src="/dist/js/swap.js"></script>
+    <script src="/dist/js/tabs.js"></script>
 
     <script src="/dist/js/jquery.js"></script>
 
@@ -105,10 +107,10 @@
       .swap:before {
         content: 'uninitialized ';
       }
-      .swap.fs-swap-element {
+      .swap.fs-swap {
         background: orange;
       }
-      .swap.fs-swap-element:before {
+      .swap.fs-swap:before {
         content: 'initialized ';
       }
       .swap.fs-swap-enabled {
@@ -252,52 +254,46 @@
     </div>
 
 
+<style>
+.tabs {
+  display: flex;
+}
+.fs-tabs-tab.fs-tabs-enabled {
+  border: 1px solid black;
+  margin-right: 10px;
+  padding: 10px;
+}
+.fs-tabs-tab.fs-tabs-tab_mobile {
+  width: 100%;
+  margin-bottom: 10px;
+}
+.fs-tabs-content.fs-tabs-enabled {
+  border: 1px solid black;
+  margin: 10px 0;
+  padding: 10px;
+}
+</style>
+
+    <div role="tablist">
+      <nav class="tabs">
+        <a href="#tab-1-1" class="tab js-tabs" data-tabs-group="tab-1" id="tab_1">One</a>
+        <a href="#tab-1-2" class="tab js-tabs" data-tabs-group="tab-1" data-tabs-active="">Two</a>
+        <a href="#tab-1-3" class="tab js-tabs" data-tabs-group="tab-1">Three</a>
+      </nav>
+      <div class="tab_content" id="tab-1-1">
+        <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>
+      </div>
+      <div class="tab_content" id="tab-1-2">
+        <p>Nullam quis risus eget urna mollis ornare vel eu leo. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.</p>
+      </div>
+      <div class="tab_content" id="tab-1-3">
+        <p>Donec id elit non mi porta gravida at eget metus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</p>
+      </div>
+    </div>
+
+
+
     <script>
-      // console.log(typeof Formstone.Ready);
-
-      // Formstone.Ready(function() {
-
-      //   console.log(Formstone(".js-background").background());
-
-      //   console.log(Formstone(".js-bg-1").background());
-
-      //   var bg2 = document.querySelectorAll(".js-bg-2");
-      //   console.log(typeof Formstone(bg2).background());
-
-      // //   // $(".jq-background").background();
-
-      // //   // console.log($(".jq-background"));
-
-
-      // //   console.log(Formstone);
-
-      // //   var background1 = Formstone.background(".js-bg-1", { foo: "bar" });
-
-      // //   console.log(background1);
-
-      // //   console.log(background1.data());
-
-
-      // //   // var background2 = Formstone.background( document.querySelector(".js-bg-2") );
-
-      // //   // var backgroundGroup = Formstone.background( document.querySelectorAll(".js-background") );
-
-      // //   // console.log(background1, background2, backgroundGroup);
-
-
-      // //   Formstone(".js-bg-1").background();
-
-
-      // //   // Formstone.background(background1, "unload");
-
-      // //   // Formstone.background(document.querySelector(".js-bg-2"), "destroy");
-
-      // });
-
-
-      //
-
-
 
 Formstone.onReady(function() {
 
@@ -305,7 +301,7 @@ Formstone.onReady(function() {
   // console.log( Formstone(".js-swap").swap({ var: 'val' }) );
   // console.log( $(".js-swap").swap({ var: 'val' }) );
 
-  $(".js-swap").swap(); //"publicMethod", { var: 'val' });
+  Formstone(".js-swap").swap(); //"publicMethod", { var: 'val' });
 
   // TODO make events work
   Formstone(".js-swap").on('enable.swap', function() { console.log('Enable', arguments); });
@@ -315,6 +311,9 @@ Formstone.onReady(function() {
 
 
   Formstone(".js-background").background();
+
+
+  Formstone(".js-tabs").tabs();
 
   // console.log( Formstone(".js-bg-1").background({ var: 'val' }) );
 

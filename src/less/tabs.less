@@ -1,64 +1,30 @@
-/**
- * @component
- * @name Tabs
- */
+/*
 
-@import "imports/utils.less";
+.fs-tabs // tab element
+.fs-tabs.fs-tabs-enabled // plugin enabled
 
-/**
- * @class
- * @name .fs-tabs-element
- * @type element
- * @description Target elmement
- */
+.fs-tabs-tab
+.fs-tabs-tab.fs-tabs-enabled // plugin enabled
+.fs-tabs-tab.fs-tabs-active // tab active
+.fs-tabs-tab.fs-tabs-mobile // mobile enabled
 
-/**
- * @class
- * @name .fs-tabs
- * @type element
- * @description Base widget class
- */
+.fs-tabs-tab_mobile
+.fs-tabs-tab_mobile.fs-tabs-enabled // plugin enabled
+.fs-tabs-tab_mobile.fs-tabs-active // tab active
+.fs-tabs-tab_mobile.fs-tabs-mobile // mobile enabled
 
-/**
- * @class
- * @name .fs-tabs.fs-tabs-enabled
- * @type modifier
- * @description Indicates enabled state
+.fs-tabs-content
+.fs-tabs-tab_mobile.fs-tabs-enabled // plugin enabled
+.fs-tabs-tab_mobile.fs-tabs-active // tab active
+.fs-tabs-tab_mobile.fs-tabs-mobile // mobile enabled
+
  */
 
 .fs-tabs {
 
-  &&-enabled {
-    .fs_clearfix();
-  }
+  &&-enabled {}
 
-  /**
-   * @class
-   * @name .fs-tabs-tab
-   * @type element
-   * @description Tab handle element
-   */
-
-  /**
-   * @class
-   * @name .fs-tabs-tab.fs-tabs-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
-
-  /**
-   * @class
-   * @name .fs-tabs-tab.fs-tabs-active
-   * @type modifier
-   * @description Indicates active state
-   */
-
-  /**
-   * @class
-   * @name .fs-tabs-tab.fs-tabs-mobile
-   * @type modifier
-   * @description Indicates mobile interface
-   */
+  // Base Tab
 
   &-tab&-enabled {
     box-sizing: border-box;
@@ -66,60 +32,28 @@
     cursor: pointer;
   }
 
-  /**
-   * @class
-   * @name .fs-tabs-content
-   * @type element
-   * @description Tab content element
-   */
+  &-tab&-mobile {
+    display: none;
+  }
 
-  /**
-   * @class
-   * @name .fs-tabs-content.fs-tabs-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
+  // Mobile Tab
 
-  /**
-   * @class
-   * @name .fs-tabs-content.fs-tabs-active
-   * @type modifier
-   * @description Indicates active state
-   */
+  &-tab_mobile {
+    display: none;
+  }
+
+  &-tab_mobile&-mobile {
+    display: block;
+  }
+
+  // Content
 
   &-content&-enabled {
-    .fs_clearfix();
-
     box-sizing: border-box;
     display: none;
   }
 
   &-content&-active {
-    display: block;
-  }
-
-  /**
-   * @class
-   * @name .fs-tabs-tab_mobile
-   * @type element
-   * @description Mobile tab handle element
-   */
-
-  /**
-   * @class
-   * @name .fs-tabs-tab_mobile.fs-tabs-active
-   * @type modifier
-   * @description Indicates active state
-   */
-
-  &-tab&-mobile,
-  &-tab_mobile,
-  &-tab_mobile&-active {
-    display: none;
-  }
-
-  &-tab_mobile&-mobile,
-  &-tab_mobile&-mobile&-active {
     display: block;
   }
 }

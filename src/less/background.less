@@ -1,5 +1,21 @@
-/**
- * @name background
+/*
+
+.fs-background // background element
+
+.fs-background-container // container elment
+
+.fs-background-media // media element
+.fs-background-media.fs-background-animated // animating state
+
+.fs-background-media.fs-background-image // image media
+.fs-background-media.fs-background-video // video media
+.fs-background-media.fs-background-embed // embed media
+.fs-background-media.fs-background-embed.fs-background-ready // embed ready
+
+.fs-background-media img // image element
+.fs-background-media video // video element
+.fs-background-media iframe // embed element
+
  */
 
 .fs-background {
@@ -12,6 +28,8 @@
     transition: none;
   }
 
+  // Container
+
   &-container {
     width: 100%;
     height: 100%;
@@ -22,18 +40,19 @@
     overflow: hidden;
   }
 
+  // Media
+
   &-media {
     position: absolute;
     top: 0;
+    right: 0;
     bottom: 0;
+    left: 0;
     opacity: 0;
 
     &-animated {
       transition: opacity 0.5s linear;
     }
-  }
-
-  &-media {
 
     img,
     video,

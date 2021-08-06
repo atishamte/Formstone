@@ -4,7 +4,8 @@
  * @description A javascript plugin for toggling element states.
  * @param {Object} options - Instance options
  * @param {Boolean} [options.collapse=true] - Allow grouped instances to be deactivated
- * @param {String} [options.maxWidth=Infinity] - Width to disable instance
+ * @param {String} [options.maxWidth=Infinity] - Width to auto-disable instance
+ * @requires mediaquery
  * @example Formstone('.target').swap({ ... });
  */
 
@@ -18,6 +19,13 @@
   var Options = {
     collapse: true,
     maxWidth: Infinity,
+  };
+
+  var Classes = {
+    base: namespace(''),
+    target: namespace('target'),
+    active: namespace('active'),
+    enabled: namespace('enabled'),
   };
 
   // Internal
@@ -58,13 +66,15 @@
 
     Formstone.setData(this, Namespace, data);
 
+    data.classes = $.extend(true, {}, Classes, data.classes);
+
     data.el = this;
     data.$el = Formstone(this);
     data.target = data.$el.data(namespace('target', false));
     data.$target = Formstone(data.target);
 
-    data.$el.addClass([namespace('element'), data.guidClass]);
-    data.$target.addClass(namespace('target'));
+    data.$el.addClass([data.classes.base, data.guidClass]);
+    data.$target.addClass(data.classes.target);
 
     // Media Query support
     data.mq = '(max-width:' + (data.maxWidth === Infinity ? '100000px' : data.maxWidth) + ')';
@@ -92,7 +102,7 @@
 
     if (data) {
       if (!data.collapse && data.group && !Formstone(data.group).filter('[data-' + Namespace + '-active]').length) {
-        Formstone(data.group).eq(0).attr(namespace('active', false), 'true');
+        Formstone(Formstone(data.group).first()).attr('data-' + namespace('active', false), 'true');
       }
 
       // Should be activate when enabled
@@ -160,7 +170,7 @@
         Formstone.mediaquery('unbind', data.guidClass);
       }
 
-      data.$swaps.removeClass([namespace('element'), namespace('target'), namespace('enabled'), namespace('active'), data.guidClass]).off('click', onClick);
+      data.$swaps.removeClass([data.classes.base, data.classes.target, data.classes.enabled, data.classes.active, data.guidClass]).off('click', onClick);
 
       Formstone.deleteData(data.el, Namespace);
     }
@@ -184,7 +194,7 @@
       // index in group
       var index = (data.group) ? Formstone(data.group).nodes.indexOf(data.el) : null;
 
-      data.$swaps.addClass(namespace('active'));
+      data.$swaps.addClass(data.classes.active);
 
       if (!fromLinked) {
         if (data.linked) {
@@ -193,7 +203,7 @@
         }
       }
 
-      data.$el.trigger('activate', [index]);
+      data.$el.trigger('activate.swap', [index]);
 
       data.active = true;
     }
@@ -209,7 +219,7 @@
     var fromLinked = arguments[0];
 
     if (data && data.enabled && data.active) {
-      data.$swaps.removeClass(namespace('active'));
+      data.$swaps.removeClass(data.classes.active);
 
       if (!fromLinked) {
         if (data.linked) {
@@ -218,7 +228,7 @@
         }
       }
 
-      data.$el.trigger('deactivate');
+      data.$el.trigger('deactivate.swap');
 
       data.active = false;
     }
@@ -236,14 +246,14 @@
     if (data && !data.enabled) {
       data.enabled = true;
 
-      data.$swaps.addClass(namespace('enabled'));
+      data.$swaps.addClass(data.classes.enabled);
 
       if (!fromLinked) {
         // Linked handles
         Formstone(data.linked).not(data.$el).swap('enable');
       }
 
-      data.$el.trigger('enable');
+      data.$el.trigger('enable.swap');
 
       if (data.onEnable) {
         data.active = false;
@@ -267,14 +277,14 @@
     if (data && data.enabled) {
       data.enabled = false;
 
-      data.$swaps.removeClass([namespace('enabled'), namespace('active')]);
+      data.$swaps.removeClass([data.classes.enabled, data.classes.active]);
 
       if (!fromLinked) {
         // Linked handles
         Formstone(data.linked).not(data.$el).swap('disable');
       }
 
-      data.$el.trigger('disable');
+      data.$el.trigger('disable.swap');
     }
   }
 

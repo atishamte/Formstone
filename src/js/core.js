@@ -7,11 +7,13 @@
 
     //=include umbrellajs/src/umbrella.js
     //=include umbrellajs/src/plugins/addclass/addclass.js
-    //=include umbrellajs/src/plugins/args/args.js
+    //=include umbrellajs/src/plugins/adjacent/adjacent.js
+    //=include umbrellajs/src/plugins/after/after.js
     //=include umbrellajs/src/plugins/append/append.js
+    //=include umbrellajs/src/plugins/args/args.js
     //=include umbrellajs/src/plugins/array/array.js
     //=include umbrellajs/src/plugins/attr/attr.js
-    //=include umbrellajs/src/plugins/adjacent/adjacent.js
+    //=include umbrellajs/src/plugins/before/before.js
     //=include umbrellajs/src/plugins/children/children.js
     //=include umbrellajs/src/plugins/data/data.js
     //=include umbrellajs/src/plugins/each/each.js
