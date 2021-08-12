@@ -8,6 +8,7 @@
  * @param {Array} [options.minHeight=[0]] - Array of min-heights
  * @param {Array} [options.maxHeight=[Infinity]] - Array of max-heights
  * @param {String} [options.unit='px'] - CSS unit used for width and height matches
+ * @requires core
  * @example Formstone.mediaquery({ ... });
  */
 

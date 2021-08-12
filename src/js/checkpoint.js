@@ -6,6 +6,7 @@
  * @param {String} [options.intersect='bottom-top'] - Position of intersection; window-element
  * @param {Number} [options.offset=0] - Intersection offset; pixel value
  * @param {Boolean} [options.reverse=false] - Deactivate animation when reversed
+ * @requires core
  * @example Formstone('.target').checkpoint({ ... });
  */
 
@@ -35,6 +36,12 @@
     active: namespace('active'),
   };
 
+  var Events = {
+    load: 'load.checkpoint',
+    activate: 'activate.checkpoint',
+    deactivate: 'deactivate.checkpoint',
+  };
+
   // Internal
 
   /**
@@ -46,6 +53,16 @@
 
   function namespace(string, prefix) {
     return (prefix === false ? '' : 'fs-') + Namespace + (string !== '' ? '-' + string : '');
+  }
+
+  /**
+   * @private
+   * @description Builds selector dotspace.
+   * @param {String} string - String to prefix
+   */
+
+  function dotspace(string) {
+    return '.' + string;
   }
 
   /**
@@ -104,7 +121,7 @@
    */
 
   function cacheInstances() {
-    $Instances = Formstone('.' + namespace(''));
+    $Instances = Formstone(dotspace(Classes.base));
 
     resize();
   }
@@ -230,7 +247,7 @@
 
     if (check >= data.elCheck) {
       if (!data.active) {
-        data.$el.trigger('checkpoint.activate');
+        data.$el.trigger(Events.activate);
       }
 
       data.active = true;
@@ -238,7 +255,7 @@
     } else {
       if (data.reverse) {
         if (data.active) {
-          data.$el.trigger('checkpoint.deactivate');
+          data.$el.trigger(Events.deactivate);
         }
 
         data.active = false;

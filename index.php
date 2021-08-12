@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/dist/css/grid.css">
     <link rel="stylesheet" href="/dist/css/background.css">
     <link rel="stylesheet" href="/dist/css/checkpoint.css">
+    <link rel="stylesheet" href="/dist/css/navigation.css">
     <link rel="stylesheet" href="/dist/css/tabs.css">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -24,6 +25,7 @@
 
     <script src="/dist/js/background.js"></script>
     <script src="/dist/js/checkpoint.js"></script>
+    <script src="/dist/js/navigation.js"></script>
     <script src="/dist/js/swap.js"></script>
     <script src="/dist/js/tabs.js"></script>
 
@@ -33,6 +35,12 @@
 
 
     <style>
+
+      *,
+      *:before,
+      *:after {
+        box-sizing: border-box;
+      }
 
       html,
       body {
@@ -157,6 +165,60 @@
 
   </head>
   <body class="fs-grid">
+    <div class="demo_content">
+
+
+<script>
+  Formstone.onReady(function() {
+    Formstone('.js-navigation').navigation();
+  });
+</script>
+<style>
+  @media screen and (min-width: 980px) {
+    .nav_offscreen,
+    .nav_handle {
+      display: none;
+    }
+  }
+
+  .nav_handle.fs-navigation-overlay-handle.fs-navigation-enabled,
+  .nav_handle.fs-navigation-reveal-handle.fs-navigation-enabled,
+  .nav_handle.fs-navigation-push-handle.fs-navigation-enabled {
+    clear: both;
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+</style>
+
+  <h5 class="nav_handle nav_handle_toggle">Menu (Toggle)</h5>
+  <nav class="js-navigation" data-navigation-handle=".nav_handle_toggle" data-navigation-options='{}'>
+    <a href="#">Home</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </nav>
+  <h5 class="nav_handle nav_handle_toggle">Menu (Toggle)</h5>
+
+  <h5 class="nav_handle nav_handle_toggle_2">Menu (Max Width)</h5>
+  <nav class="js-navigation" data-navigation-handle=".nav_handle_toggle_2" data-navigation-options='{"maxWidth":"10000px"}'>
+    <a href="#">Home</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </nav>
+
+  <button type="button" class="button nav_handle nav_handle_overlay_left">Menu (Overlay Left)</button>
+
+  <button type="button" class="button nav_handle nav_handle_overlay_right">Menu (Overlay Right)</button>
+
+  <button type="button" class="button nav_handle nav_handle_reveal_left">Menu (Reveal Left)</button>
+
+  <button type="button" class="button nav_handle nav_handle_reveal_right">Menu (Reveal Right)</button>
+
+  <button type="button" class="button nav_handle nav_handle_push_left">Menu (Push Left)</button>
+
+  <button type="button" class="button nav_handle nav_handle_push_right">Menu (Push Right)</button>
+
+
+
 
 
 <form action="#" medthod="GET" class="fs-row form demo_form">
@@ -709,6 +771,41 @@ Formstone.onReady(function() {
       ?>
 
     </div>
+
+  </div>
+
+
+
+
+
+<div class="js-navigation_elements">
+
+  <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_overlay_left" data-navigation-content=".demo_content" data-navigation-options='{"type":"overlay","gravity":"left","maxWidth":"10000px"}'>
+    Overlay Left
+  </nav>
+
+  <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_overlay_right" data-navigation-content=".demo_content" data-navigation-options='{"type":"overlay","gravity":"right","maxWidth":"10000px"}'>
+    Overlay Right
+  </nav>
+
+  <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_reveal_left" data-navigation-content=".demo_content" data-navigation-options='{"type":"reveal","gravity":"left","maxWidth":"10000px"}'>
+    Reveal Left
+  </nav>
+
+  <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_reveal_right" data-navigation-content=".demo_content" data-navigation-options='{"type":"reveal","gravity":"right","maxWidth":"10000px"}'>
+    Reveal Right
+  </nav>
+
+  <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_push_left" data-navigation-content=".demo_content" data-navigation-options='{"type":"push","gravity":"left","maxWidth":"10000px"}'>
+    Push Left
+  </nav>
+
+  <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_push_right" data-navigation-content=".demo_content" data-navigation-options='{"type":"push","gravity":"right","maxWidth":"10000px"}'>
+    Push Right
+  </nav>
+
+</div>
+
 
   </body>
 </html>

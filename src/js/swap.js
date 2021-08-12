@@ -5,6 +5,7 @@
  * @param {Object} options - Instance options
  * @param {Boolean} [options.collapse=true] - Allow grouped instances to be deactivated
  * @param {String} [options.maxWidth=Infinity] - Width to auto-disable instance
+ * @requires core
  * @requires mediaquery
  * @example Formstone('.target').swap({ ... });
  */
@@ -26,6 +27,13 @@
     target: namespace('target'),
     active: namespace('active'),
     enabled: namespace('enabled'),
+  };
+
+  var Events = {
+    activate: 'activate.swap',
+    deactivate: 'deactivate.swap',
+    enable: 'enable.swap',
+    disable: 'disable.swap',
   };
 
   // Internal
@@ -87,7 +95,8 @@
     var group = data.$el.data(namespace('group', false));
     data.group = group ? '[data-' + Namespace + '-group="' + group + '"]' : false;
 
-    data.$swaps = Formstone([data.el, data.$target.first()]);
+    data.$swaps = Formstone(data.el);
+    data.$swaps.nodes = data.$swaps.nodes.concat(data.$target.nodes);
 
     data.$el.on('click', onClick);
   }
@@ -203,7 +212,7 @@
         }
       }
 
-      data.$el.trigger('activate.swap', [index]);
+      data.$el.trigger(Events.activate, [index]);
 
       data.active = true;
     }
@@ -228,7 +237,7 @@
         }
       }
 
-      data.$el.trigger('deactivate.swap');
+      data.$el.trigger(Events.deactivate);
 
       data.active = false;
     }
@@ -253,7 +262,7 @@
         Formstone(data.linked).not(data.$el).swap('enable');
       }
 
-      data.$el.trigger('enable.swap');
+      data.$el.trigger(Events.enable);
 
       if (data.onEnable) {
         data.active = false;
@@ -284,7 +293,7 @@
         Formstone(data.linked).not(data.$el).swap('disable');
       }
 
-      data.$el.trigger('disable.swap');
+      data.$el.trigger(Events.disable);
     }
   }
 

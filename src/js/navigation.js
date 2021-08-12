@@ -1,560 +1,589 @@
-/* global define */
+/**
+ * @function
+ * @name Tabs
+ * @description A javascript plugin for simple responsive navigation.
+ * @param {Object} options - Instance options
+ * @param {String} [options.customClass=''] - Additional class applied to element
+ * @param {String} [options.gravity='left'] - Gravity of 'push', 'reveal' and 'overlay' navigation; 'right', 'left'
+ * @param {Boolean} [options.label=true] - Display handle width label
+ * @param {String} [options.labels] - Label text
+ * @param {String} [options.labels.closed='Menu'] - Closed state label text
+ * @param {String} [options.labels.open='Close'] - Open state label text
+ * @param {String} [options.maxWidth=Infinity] - Width to auto-disable instance
+ * @param {String} [options.type='toggle'] - Type of navigation; 'toggle', 'push', 'reveal', 'overlay'
+ * @requires core
+ * @requires mediaquery
+ * @requires swap
+ * @example Formstone('.target').nevigation({ ... });
+ */
 
-(function(factory) {
-    if (typeof define === "function" && define.amd) {
-      define([
-        "jquery",
-        "./core",
-        "./mediaquery",
-        "./swap"
-      ], factory);
+ (function(window, Formstone) {
+
+  'use strict';
+
+  var Namespace = 'navigation';
+  var GUID = 0;
+
+  var Initialized = false;
+  var $Locks = Formstone();
+
+  var Options = {
+    customClass: '',
+    gravity: 'left',
+    label: true,
+    labels: {
+      closed: 'Menu',
+      open: 'Close',
+    },
+    maxWidth: Infinity,
+    mobileMaxWidth: '740px',
+    type: 'toggle',
+  };
+
+  var Classes = {
+    'base': namespace(''),
+    'animated': namespace('animated'),
+    'content': namespace('content'),
+    'enabled': namespace('enabled'),
+    'focus': namespace('focus'),
+    'handle': namespace('handle'),
+    'lock': namespace('lock'),
+    'nav': namespace('nav'),
+    'open': namespace('open'),
+  };
+
+  var Events = {
+    open: 'open.navigation',
+    close: 'close.navigation',
+  }
+
+  // Internal
+
+  /**
+   * @private
+   * @description Builds namespace.
+   * @param {String} string - String to namespace
+   * @param {Boolean} prefix - Inlcude library prefix
+   */
+
+  function namespace(string, prefix) {
+    return (prefix === false ? '' : 'fs-') + Namespace + (string !== '' ? '-' + string : '');
+  }
+
+  /**
+   * @private
+   * @description Builds selector dotspace.
+   * @param {String} string - String to prefix
+   */
+
+  function dotspace(string) {
+    return '.' + string;
+  }
+
+  /**
+   * @private
+   * @description Sets up plugin.
+   */
+
+  function initialize() {
+    if (!Initialized) {
+      $Locks = Formstone('html, body');
+    }
+  }
+
+  // Private
+
+  /**
+   * @private
+   * @description Builds instance.
+   */
+
+  function construct(options) {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data) {
+      return;
+    }
+
+    initialize();
+
+    GUID++;
+
+    data = Formstone.extend({
+      guid: GUID,
+      guidClass: namespace(String(GUID).padStart(3, '0')),
+      enabled: false,
+      open: false,
+      // gravity: '',
+    }, Options, options, (Formstone.getData(this, 'navigationOptions') || {}));
+
+    Formstone.setData(this, Namespace, data);
+
+    data.el = this;
+    data.$el = Formstone(this);
+    data.handle = Formstone.getData(this, 'navigationHandle');
+    data.content = Formstone.getData(this, 'navigationContent');
+
+    // guid
+    data.guidHandle = data.guidClass + '-handle';
+
+    data.isToggle = (data.type === 'toggle');
+    data.open = false;
+
+    if (data.isToggle) {
+      data.gravity = '';
+    }
+
+    var baseClass = Classes.base;
+    var typeClass = [baseClass, data.type].join('-');
+    var gravityClass = data.gravity ? [typeClass, data.gravity].join('-') : '';
+    var classGroup = [data.guidClass, data.customClass];
+
+    data.handleClasses = [
+      // Classes.handle,
+      Classes.handle.replace(baseClass, typeClass),
+      gravityClass ? Classes.handle.replace(baseClass, gravityClass) : '',
+      data.guidHandle,
+      data.customClass,
+    ];
+
+    data.thisClasses = [
+      Classes.nav,
+      Classes.nav.replace(baseClass, typeClass),
+      gravityClass ? Classes.nav.replace(baseClass, gravityClass) : '',
+    ].concat(classGroup);
+
+    data.contentClasses = [
+      Classes.content,
+      Classes.content.replace(baseClass, typeClass),
+    ].concat(classGroup);
+
+    data.contentClassesOpen = [
+      gravityClass ? Classes.content.replace(baseClass, gravityClass) : '',
+      Classes.open
+    ];
+
+    // DOM
+
+    data.$nav = data.$el.addClass(data.thisClasses).attr('role', 'navigation');
+    data.$handle = Formstone(data.handle).addClass(data.handleClasses);
+    data.$content = Formstone(data.content).addClass(data.contentClasses);
+
+    if (data.content) {
+      data.$animate = Formstone([ dotspace(Classes.nav)+dotspace(data.guidClass), data.content ]);
     } else {
-      factory(jQuery, Formstone);
-    }
-  }(function($, Formstone) {
-
-    "use strict";
-
-    /**
-     * @method private
-     * @name setup
-     * @description Setup plugin.
-     */
-
-    function setup() {
-      // $Body  = Formstone.$body;
-      $Locks = $("html, body");
+      data.$animate = data.$nav;
     }
 
-    /**
-     * @method private
-     * @name construct
-     * @description Builds instance.
-     * @param data [object] "Instance data"
-     */
+    cacheLabel(data);
 
-    function construct(data) {
-      // guid
-      data.handleGuid = RawClasses.handle + data.guid;
+    // Tab index
 
-      data.isToggle = (data.type === "toggle");
-      data.open = false;
+    data.navTabIndex = data.$nav.attr('tabindex');
+    data.$nav.attr('tabindex', -1);
 
-      if (data.isToggle) {
-        data.gravity = "";
+    // Aria
+
+    data.id = data.$el.attr('id');
+
+    if (data.id) {
+      data.ariaId = data.id;
+    } else {
+      data.ariaId = data.guidClass;
+      data.$el.attr('id', data.ariaId);
+    }
+
+    // toggle
+
+    data.$handle.attr('data-swap-target', dotspace(data.guidClass))
+      .attr('data-swap-linked', dotspace(data.guidHandle))
+      .attr('data-swap-group', Classes.base)
+      .attr('tabindex', 0)
+      .on('activate.swap', onOpen)
+      .on('deactivate.swap', onClose)
+      .on('enable.swap', onEnable)
+      .on('disable.swap', onDisable)
+      .on('focus', onFocus)
+      .on('blur', onBlur);
+
+    if (!data.$handle.is('a, button')) {
+      data.$handle.on('keypress', onKeyup);
+    }
+  }
+
+  /**
+   * @private
+   * @description Run post build.
+   */
+
+   function postConstruct() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (!data) {
+      return;
+    }
+
+    data.$handle.swap({
+      maxWidth: data.maxWidth,
+      classes: {
+        target: data.guidClass,
+        enabled: Classes.enabled,
+        active: Classes.open,
       }
-
-      var baseClass = RawClasses.base,
-        typeClass = [baseClass, data.type].join("-"),
-        gravityClass = data.gravity ? [typeClass, data.gravity].join("-") : "",
-        classGroup = [data.rawGuid, data.theme, data.customClass].join(" ");
-
-      data.handle = this.data(Namespace + "-handle");
-      data.content = this.data(Namespace + "-content");
-
-      data.handleClasses = [
-        RawClasses.handle,
-        RawClasses.handle.replace(baseClass, typeClass),
-        gravityClass ? RawClasses.handle.replace(baseClass, gravityClass) : "",
-        data.handleGuid,
-        classGroup
-      ].join(" ");
-
-      data.thisClasses = [
-        RawClasses.nav.replace(baseClass, typeClass),
-        gravityClass ? RawClasses.nav.replace(baseClass, gravityClass) : "",
-        classGroup
-      ];
-
-      data.contentClasses = [
-        RawClasses.content.replace(baseClass, typeClass),
-        classGroup
-      ].join(" ");
-
-      data.contentClassesOpen = [
-        gravityClass ? RawClasses.content.replace(baseClass, gravityClass) : "",
-        RawClasses.open
-      ].join(" ");
-
-      // DOM
-
-      data.$nav = this.addClass(data.thisClasses.join(" ")).attr("role", "navigation");
-      data.$handle = $(data.handle).addClass(data.handleClasses);
-      data.$content = $(data.content).addClass(data.contentClasses);
-      data.$animate = $().add(data.$nav).add(data.$content);
-
-      cacheLabel(data);
-
-      // Tab index
-
-      data.navTabIndex = data.$nav.attr("tabindex");
-      data.$nav.attr("tabindex", -1);
-
-      // Aria
-
-      data.id = this.attr("id");
-
-      if (data.id) {
-        data.ariaId = data.id;
-      } else {
-        data.ariaId = data.rawGuid;
-        this.attr("id", data.ariaId);
-      }
-
-      // toggle
-
-      data.$handle.attr("data-swap-target", data.dotGuid)
-        .attr("data-swap-linked", data.handleGuid)
-        .attr("data-swap-group", RawClasses.base)
-        .attr("tabindex", 0)
-        .on("activate.swap" + data.dotGuid, data, onOpen)
-        .on("deactivate.swap" + data.dotGuid, data, onClose)
-        .on("enable.swap" + data.dotGuid, data, onEnable)
-        .on("disable.swap" + data.dotGuid, data, onDisable)
-        .on(Events.focus + data.dotGuid, data, onFocus)
-        .on(Events.blur + data.dotGuid, data, onBlur)
-        .fsSwap({
-          maxWidth: data.maxWidth,
-          classes: {
-            target: data.dotGuid,
-            enabled: Classes.enabled,
-            active: Classes.open,
-            raw: {
-              target: data.rawGuid,
-              enabled: RawClasses.enabled,
-              active: RawClasses.open
-            }
-          }
-        });
-
-      if (!data.$handle.is("a, button")) {
-        data.$handle.on(Events.keyPress + data.dotGuid, data, onKeyup);
-      }
-
-      // $Body.on( [ Events.focus + data.dotGuid, Events.focusIn + data.dotGuid ].join(" "), data, onDocumentFocus);
-    }
+    });
+  }
 
     /**
-     * @method private
-     * @name destruct
-     * @description Tears down instance.
-     * @param data [object] "Instance data"
-     */
-
-    function destruct(data) {
-      data.$content.removeClass([data.contentClasses, data.contentClassesOpen].join(" "))
-        .off(Events.namespace);
-
-      data.$handle.removeAttr("aria-controls")
-        .removeAttr("aria-expanded")
-        .removeAttr("data-swap-target")
-        .removeData("swap-target")
-        .removeAttr("data-swap-linked")
-        .removeAttr("data-swap-group")
-        .removeData("swap-linked")
-        .removeData("tabindex")
-        .removeClass(data.handleClasses)
-        .off(data.dotGuid)
-        .html(data.originalLabel)
-        .fsSwap("destroy");
-
-      data.$nav.attr("tabindex", data.navTabIndex);
-
-      // $Body.off(data.dotGuid);
-
-      restoreLabel(data);
-
-      clearLocks(data);
-
-      this.removeAttr("aria-hidden")
-        .removeClass(data.thisClasses.join(" "))
-        .off(Events.namespace);
-
-      if (this.attr("id") === data.rawGuid) {
-        this.removeAttr("id");
-      }
-    }
-
-    /**
-     * @method
-     * @name open
-     * @description Opens instance.
-     * @example $(".target").navigation("open");
-     */
-
-    function open(data) {
-      data.$handle.fsSwap("activate");
-    }
-
-    /**
-     * @method
-     * @name close
-     * @description Closes instance.
-     * @example $(".target").navigation("close");
-     */
-
-    function close(data) {
-      data.$handle.fsSwap("deactivate");
-    }
-
-    /**
-     * @method
-     * @name enable
-     * @description Enables instance.
-     * @example $(".target").navigation("enable");
-     */
-
-    function enable(data) {
-      data.$handle.fsSwap("enable");
-    }
-
-    /**
-     * @method
-     * @name disable
-     * @description Disables instance.
-     * @example $(".target").navigation("disable");
-     */
-
-    function disable(data) {
-      data.$handle.fsSwap("disable");
-    }
-
-    /**
-     * @method private
-     * @name onFocus
-     * @description Handles instance focus
-     * @param e [object] "Event data"
+     * @private
+     * @description Handles instance focus.
+     * @param e [object] 'Event data'
      */
 
     function onFocus(e) {
-      e.data.$handle.addClass(RawClasses.focus);
+      var target = Formstone(this).data('swap-target');
+      var nav = Formstone(target).first();
+      var data = Formstone.getData(nav, Namespace);
+
+      if (data) {
+        data.$handle.addClass(Classes.focus);
+      }
     }
 
     /**
-     * @method private
-     * @name onBlur
-     * @description Handles instance blur
-     * @param e [object] "Event data"
+     * @private
+     * @description Handles instance blur.
+     * @param e [object] 'Event data'
      */
 
     function onBlur(e) {
-      e.data.$handle.removeClass(RawClasses.focus);
+      var target = Formstone(this).data('swap-target');
+      var nav = Formstone(target).first();
+      var data = Formstone.getData(nav, Namespace);
+
+      if (data) {
+        data.$handle.removeClass(Classes.focus);
+      }
     }
 
     /**
-     * @method private
-     * @name onKeyup
-     * @description Handles keypress event on inputs
-     * @param e [object] "Event data"
+     * @private
+     * @description Handles keypress event on inputs.
+     * @param e [object] 'Event data'
      */
 
     function onKeyup(e) {
-      var data = e.data;
+      var target = Formstone(this).data('swap-target');
+      var nav = Formstone(target).first();
+      var data = Formstone.getData(nav, Namespace);
 
-      // If arrow keys
-      if (e.keyCode === 13 || e.keyCode === 32) {
-        Functions.killEvent(e);
+      if (data && (e.keyCode === 13 || e.keyCode === 32)) {
+        Formstone.killEvent(e);
 
-        data.$handle.trigger(Events.raw.click);
+        data.$handle.trigger('click');
       }
     }
 
     /**
-     * @method private
-     * @name onOpen
+     * @private
      * @description Handles nav open event.
-     * @param e [object] "Event data"
+     * @param e [object] 'Event data'
      */
 
     function onOpen(e) {
-      if (!e.originalEvent) { // thanks IE :/
-        var data = e.data;
+      var target = Formstone(this).data('swap-target');
+      var nav = Formstone(target+dotspace(Classes.nav)).first();
+      var data = Formstone.getData(nav, Namespace);
 
-        if (!data.open) {
-          data.$el.trigger(Events.open)
-            .attr("aria-hidden", false);
+      if (data && !data.open) {
+        data.$el.trigger(Events.open)
+          .attr('aria-hidden', false);
 
-          data.$content.addClass(data.contentClassesOpen)
-            .one(Events.click, function() {
-              close(data);
-            });
+        data.$content.addClass(data.contentClassesOpen)
+          // .one(Events.click, function() {
+          //   close(data);
+          // });
 
-          data.$handle.attr("aria-expanded", true);
+        data.$handle.attr('aria-expanded', true);
 
-          if (data.label) {
-            data.$handle.html(data.labels.open);
-          }
-
-          addLocks(data);
-
-          data.open = true;
-
-          data.$nav.focus();
+        if (data.label) {
+          data.$handle.html(data.labels.open);
         }
+
+        addLocks(data);
+
+        data.open = true;
+
+        nav.focus();
       }
     }
 
-    /**
-     * @method private
-     * @name onClose
-     * @description Handles nav close event.
-     * @param e [object] "Event data"
-     */
+  /**
+   * @private
+   * @description Handles nav close event.
+   * @param e [object] 'Event data'
+   */
 
-    function onClose(e) {
-      if (!e.originalEvent) { // thanks IE :/
-        var data = e.data;
+  function onClose(e) {
+    var target = Formstone(this).data('swap-target');
+    var nav = Formstone(target).first();
+    var data = Formstone.getData(nav, Namespace);
 
-        if (data.open) {
-          data.$el.trigger(Events.close)
-            .attr("aria-hidden", true);
+    if (data && data.open) {
+      data.$el.trigger(Events.close)
+        .attr('aria-hidden', true);
 
-          data.$content.removeClass(data.contentClassesOpen)
-            .off(Events.namespace);
+      data.$content.removeClass(data.contentClassesOpen)
+        .off('activate.swap', onOpen)
+        .off('deactivate.swap', onClose)
+        .off('enable.swap', onEnable)
+        .off('disable.swap', onDisable);
 
-          data.$handle.attr("aria-expanded", false);
+      data.$handle.attr('aria-expanded', false);
 
-          if (data.label) {
-            data.$handle.html(data.labels.closed);
-          }
-
-          clearLocks(data);
-
-          data.open = false;
-
-          data.$el.focus();
-        }
+      if (data.label) {
+        data.$handle.html(data.labels.closed);
       }
+
+      clearLocks(data);
+
+      data.open = false;
+
+      data.el.focus();
     }
+  }
 
-    /**
-     * @method private
-     * @name onEnable
-     * @description Handles nav enable event.
-     * @param e [object] "Event data"
-     */
+  /**
+   * @private
+   * @description Handles nav enable event.
+   * @param e [object] 'Event data'
+   */
 
-    function onEnable(e) {
-      var data = e.data;
+  function onEnable(e) {
+    var target = Formstone(this).data('swap-target');
+    var nav = Formstone(target).first();
+    var data = Formstone.getData(nav, Namespace);
 
-      data.$el.attr("aria-hidden", true);
-      data.$handle.attr("aria-controls", data.ariaId)
-        .attr("aria-expanded", false);
-      data.$content.addClass(RawClasses.enabled);
+    if (data) {
+      data.$el.attr('aria-hidden', 'true');
+      data.$handle.attr('aria-controls', data.ariaId)
+        .attr('aria-expanded', 'false');
+      data.$content.addClass(Classes.enabled);
 
       setTimeout(function() {
-        data.$animate.addClass(RawClasses.animated);
+        data.$animate.addClass(Classes.animated);
       }, 0);
 
       if (data.label) {
         data.$handle.html(data.labels.closed);
       }
     }
+  }
 
-    /**
-     * @method private
-     * @name onDisable
-     * @description Handles nav disable event.
-     * @param e [object] "Event data"
-     */
+  /**
+   * @private
+   * @description Handles nav disable event.
+   * @param e [object] 'Event data'
+   */
 
-    function onDisable(e) {
-      var data = e.data;
+  function onDisable(e) {
+    var target = Formstone(this).data('swap-target');
+    var nav = Formstone(target).first();
+    var data = Formstone.getData(nav, Namespace);
 
-      data.$el.removeAttr("aria-hidden");
-      data.$handle.removeAttr("aria-controls")
-        .removeAttr("aria-expanded");
-      data.$content.removeClass(RawClasses.enabled, RawClasses.animated);
-      data.$animate.removeClass(RawClasses.animated);
+    if (data) {
+      data.el.removeAttribute('aria-hidden');
+      data.handle.removeAttribute('aria-controls');
+      data.handle.removeAttribute('aria-expanded');
+      data.$content.removeClass([Classes.enabled, Classes.animated]);
+      data.$animate.removeClass(Classes.animated);
 
       restoreLabel(data);
 
       clearLocks(data);
     }
+  }
 
-    /**
-     * @method private
-     * @name addLocks
-     * @description Locks scrolling
-     * @param data [object] "Instance data"
-     */
+  /**
+   * @private
+   * @description Locks scrolling
+   * @param data [object] 'Instance data'
+   */
 
-    function addLocks(data) {
-      if (!data.isToggle) {
-        $Locks.addClass(RawClasses.lock);
-      }
+  function addLocks(data) {
+    if (!data.isToggle) {
+      $Locks.addClass(Classes.lock);
     }
+  }
 
-    /**
-     * @method private
-     * @name clearLocks
-     * @description Unlocks scrolling
-     * @param data [object] "Instance data"
-     */
+  /**
+   * @private
+   * @description Unlocks scrolling
+   * @param data [object] 'Instance data'
+   */
 
-    function clearLocks(data) {
-      if (!data.isToggle) {
-        $Locks.removeClass(RawClasses.lock);
-      }
+  function clearLocks(data) {
+    if (!data.isToggle) {
+      $Locks.removeClass(Classes.lock);
     }
+  }
 
-    /**
-     * @method private
-     * @name cacheLabel
-     * @description Sets handle labels
-     * @param data [object] "Instance data"
-     */
+  /**
+   * @private
+   * @description Sets handle labels
+   * @param data [object] 'Instance data'
+   */
 
-    function cacheLabel(data) {
-      if (data.label) {
-        if (data.$handle.length > 1) {
-          data.originalLabel = [];
+  function cacheLabel(data) {
+    if (data.label) {
+      if (data.$handle.length > 1) {
+        data.originalLabel = [];
 
-          for (var i = 0, count = data.$handle.length; i < count; i++) {
-            data.originalLabel[i] = data.$handle.eq(i).html();
-          }
-        } else {
-          data.originalLabel = data.$handle.html();
+        for (var i = 0, count = data.$handle.length; i < count; i++) {
+          data.originalLabel[i] = Formstone(data.$handle.nodes[i]).html();
         }
+      } else {
+        data.originalLabel = data.$handle.html();
       }
     }
+  }
 
-    /**
-     * @method private
-     * @name restoreLabel
-     * @description restores handle labels
-     * @param data [object] "Instance data"
-     */
+  /**
+   * @private
+   * @description restores handle labels
+   * @param data [object] 'Instance data'
+   */
 
-    function restoreLabel(data) {
-      if (data.label) {
-        if (data.$handle.length > 1) {
-          for (var i = 0, count = data.$handle.length; i < count; i++) {
-            data.$handle.eq(i).html(data.originalLabel[i]);
-          }
-        } else {
-          data.$handle.html(data.originalLabel);
+  function restoreLabel(data) {
+    if (data.label) {
+      if (data.$handle.length > 1) {
+        for (var i = 0, count = data.$handle.length; i < count; i++) {
+          Formstone(data.$handle.nodes[i]).html(data.originalLabel[i]);
         }
+      } else {
+        data.$handle.html(data.originalLabel);
       }
     }
+  }
 
-    /**
-     * @method private
-     * @name onDocumentFocus
-     * @description Handles document focus
-     * @param e [object] "Event data"
-     */
+  // Public
 
-    // function onDocumentFocus(e) {
-    //   var target = e.target,
-    //     data   = e.data;
-    //
-    //   if (data.open && !$.contains(data.$nav, target) && target !== data.$nav[0] && target !== data.$handle[0]) {
-    //     Functions.killEvent(e);
-    //
-    //     data.$nav.focus();
-    //   }
-    // }
+  /**
+   * @description Sets default options; applies to future instances.
+   * @param {Object} options - Default options
+   * @example Formstone.navigation('defaults', { ... });
+   */
 
-    /**
-     * @plugin
-     * @name Navigation
-     * @description A jQuery plugin for simple responsive navigation.
-     * @type widget
-     * @main navigation.js
-     * @main navigation.css
-     * @dependency jQuery
-     * @dependency core.js
-     * @dependency mediaquery.js
-     * @dependency swap.js
-     */
+   function defaults(options) {
+    Options = Formstone.extend({}, Options, options);
+  }
 
-    var Plugin = Formstone.Plugin("navigation", {
-        widget: true,
+  /**
+   * @private
+   * @description Tears down instance.
+   */
 
-        /**
-         * @options
-         * @param customClass [string] <''> "Class applied to instance"
-         * @param gravity [string] <'left'> "Gravity of 'push', 'reveal' and 'overlay' navigation; 'right', 'left'"
-         * @param label [boolean] <true> "Display handle width label"
-         * @param labels.closed [string] <'Menu'> "Closed state text"
-         * @param labels.open [string] <'Close'> "Open state text"
-         * @param maxWidth [string] <'980px'> "Width at which to auto-disable plugin"
-         * @param theme [string] <"fs-light"> "Theme class name"
-         * @param type [string] <'toggle'> "Type of navigation; 'toggle', 'push', 'reveal', 'overlay'"
-         */
+  function destroy() {
+    var data = Formstone.getData(this, Namespace);
 
-        defaults: {
-          customClass: "",
-          gravity: "left",
-          label: true,
-          labels: {
-            closed: "Menu",
-            open: "Close"
-          },
-          maxWidth: "980px",
-          theme: "fs-light",
-          type: "toggle"
-        },
+    if (!data) {
+      return;
+    }
 
-        classes: [
-          "handle",
-          "nav",
-          "content",
-          "animated",
-          "enabled",
-          "focus",
-          "open",
-          "toggle",
-          "push",
-          "reveal",
-          "overlay",
-          "left",
-          "right",
-          "lock"
-        ],
+    data.$content.removeClass(data.contentClasses, data.contentClassesOpen);
+      // .off(Events.namespace);
 
-        /**
-         * @events
-         * @event open.navigation "Navigation opened"
-         * @event close.navigation "Navigation closed"
-         */
+    data.handle.removeAttrribute('aria-controls');
+    data.handle.removeAttrribute('aria-expanded');
+    data.handle.removeAttrribute('data-swap-target');
+    data.handle.removeAttrribute('data-swap-linked');
+    data.handle.removeAttrribute('data-swap-group');
+    data.$handle.removeClass(data.handleClasses)
+      .off('activate.swap', onOpen)
+      .off('deactivate.swap', onClose)
+      .off('enable.swap', onEnable)
+      .off('disable.swap', onDisable)
+      .off('focus', onFocus)
+      .off('blur', onBlur)
+      .html(data.originalLabel)
+      .swap('destroy');
 
-        events: {
-          open: "open",
-          close: "close"
-        },
+    data.$nav.attr('tabindex', data.navTabIndex);
 
-        methods: {
-          _construct: construct,
-          _destruct: destruct,
+    restoreLabel(data);
 
-          // Public Methods
+    clearLocks(data);
 
-          open: open,
-          close: close,
-          enable: enable,
-          disable: disable
-        }
-      }),
+    data.el.removeAttribute('aria-hidden');
+    data.$el.removeClass(data.thisClasses);
 
-      // Localize References
+    if (data.$el.attr('id') === data.guidClass) {
+      data.el.removeAttribute('id');
+    }
+  }
 
-      Namespace = Plugin.namespace,
-      Classes = Plugin.classes,
-      RawClasses = Classes.raw,
-      Events = Plugin.events,
-      Functions = Plugin.functions,
-      // $Body         = null,
+  /**
+   * @description Opens instance.
+   * @example Formstone('.target').navigation('open');
+   */
 
-      // Internal
+  function open() {
+    var data = Formstone.getData(this, Namespace);
 
-      $Locks = null;
+    if (data) {
+      data.$handle.swap('activate');
+    }
+  }
 
-    // Setup
+  /**
+   * @description Closes instance.
+   * @example Formstone('.target').navigation('close');
+   */
 
-    Formstone.Ready(setup);
+  function close() {
+    var data = Formstone.getData(this, Namespace);
 
-  })
+    if (data) {
+      data.$handle.swap('deactivate');
+    }
+  }
 
-);
+  /**
+   * @description Enables instance.
+   * @example Formstone('.target').navigation('enable');
+   */
+
+   function enable() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data) {
+      data.$handle.swap('enable');
+    }
+  }
+
+  /**
+   * @description Disables instance.
+   * @example Formstone('.target').navigation('disable');
+   */
+
+  function disable() {
+    var data = Formstone.getData(this, Namespace);
+
+    if (data) {
+      data.$handle.swap('disable');
+    }
+  }
+
+  // Component
+
+  Formstone.Component(Namespace, {
+    _construct: construct,
+    _postConstruct: postConstruct,
+    defaults: defaults,
+    destroy: destroy,
+    open: open,
+    close: close,
+    enable: enable,
+    disable: disable,
+  });
+
+})(window, Formstone);

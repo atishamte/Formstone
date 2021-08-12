@@ -6,6 +6,7 @@
  * @param {String} [options.customClass=''] - Additional class applied to element
  * @param {String} [options.maxWidth=Infinity] - Width to auto-disable instance
  * @param {String} [options.mobileMaxWidth='740px'] - Width to auto-disable mobile styles
+ * @requires core
  * @requires mediaquery
  * @requires swap
  * @example Formstone('.target').swap({ ... });
@@ -34,6 +35,17 @@
     'mobile': namespace('mobile'),
   };
 
+  var Events = {
+    click: 'click',
+    update: 'update.tabs',
+    swap: {
+      activate: 'activate.swap',
+      deactivate: 'deactivate.swap',
+      enable: 'enable.swap',
+      disable: 'disable.swap',
+    }
+  };
+
   // Internal
 
   /**
@@ -46,6 +58,16 @@
    function namespace(string, prefix) {
     return (prefix === false ? '' : 'fs-') + Namespace + (string !== '' ? '-' + string : '');
   }
+
+  // /**
+  //  * @private
+  //  * @description Builds selector dotspace.
+  //  * @param {String} string - String to prefix
+  //  */
+
+  // function dotspace(string) {
+  //   return '.' + srting;
+  // }
 
   // Private
 
@@ -148,10 +170,10 @@
     data.$el.attr('data-swap-target', data.href)
       .attr('data-swap-group', data.group)
       .addClass(data.elClasses)
-      .on('activate.swap', onActivate) // TODO??
-      .on('deactivate.swap', onDeactivate)
-      .on('enable.swap', onEnable)
-      .on('disable.swap', onDisable);
+      .on(Events.swap.activate, onActivate)
+      .on(Events.swap.deactivate, onDeactivate)
+      .on(Events.swap.enable, onEnable)
+      .on(Events.swap.disable, onDisable);
   }
 
   /**
@@ -170,8 +192,8 @@
       maxWidth: data.maxWidth,
       classes: {
         target: data.guidClass,
-        enabled: namespace('enabled'),
-        active: namespace('active'),
+        enabled: Classes.enabled,
+        active: Classes.active,
       //   // raw: {
       //   //   target: data.guidClass,
       //   //   enabled: namespace('enabled'),
@@ -181,7 +203,7 @@
       collapse: false
     });
 
-    data.$mobileTab.on('click', onMobileActivate);
+    data.$mobileTab.on(Events.click, onMobileActivate);
 
     // Media Query support
     Formstone.mediaquery('bind', data.guidClass, data.mq, {
@@ -197,7 +219,7 @@
   /**
    * @private
    * @description Handles tab open event.
-   * @param e [object] "Event data"
+   * @param e [object] 'Event data'
    */
 
   function onActivate(e) {
@@ -207,7 +229,7 @@
       var index = 0;
 
       data.$el.attr('aria-selected', true)
-        .trigger('update.tabs', [index]);
+        .trigger(Events.update, [index]);
       data.$mobileTab.addClass(Classes.active);
       data.$content.attr('aria-hidden', false)
         .addClass(Classes.active);
@@ -217,7 +239,7 @@
   /**
    * @private
    * @description Handles tab close event.
-   * @param e [object] "Event data"
+   * @param e [object] 'Event data'
    */
 
   function onDeactivate(e) {
@@ -234,7 +256,7 @@
   /**
    * @private
    * @description Handles tab enable event.
-   * @param e [object] "Event data"
+   * @param e [object] 'Event data'
    */
 
   function onEnable(e) {
@@ -251,7 +273,7 @@
   /**
    * @private
    * @description Handles tab disable event.
-   * @param e [object] "Event data"
+   * @param e [object] 'Event data'
    */
 
   function onDisable(e) {
@@ -272,7 +294,7 @@
   /**
    * @private
    * @description Activates instance.
-   * @param e [object] "Event data"
+   * @param e [object] 'Event data'
    */
 
   function onMobileActivate(e) {
@@ -341,7 +363,7 @@
 
     Formstone.mediaquery('unbind', data.guidClass);
 
-    data.$mobileTab //.off(Events.namespace)
+    data.$mobileTab.off(Events.click, onMobileActivate)
       .remove();
 
     data.elClasses.push(Classes.mobile);
@@ -366,10 +388,13 @@
     // data.el.removeData('data-swap-group');
     data.el.removeAttribute('role');
     data.$el.removeClass(data.elClasses)
-      // .off(Events.namespace)
+      .off(Events.swap.activate, onActivate)
+      .off(Events.swap.deactivate, onDeactivate)
+      .off(Events.swap.enable, onEnable)
+      .off(Events.swap.disable, onDisable)
       .swap('destroy');
 
-    if (data.$el.attr('id') === data.rawGuid) {
+    if (data.$el.attr('id') === data.guidClass) {
       data.el.removeAttribute('id');
     }
   }

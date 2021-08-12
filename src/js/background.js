@@ -12,7 +12,7 @@
  * @param {Boolean} [options.mute=true] - Mute video background
  * @param {String} [options.source=null] - Source image string
  * @param {Object} [options.source={}] - Source media object
- * @requires module:transition
+ * @requires transition
  * @example Formstone('.target').background({ ... });
  */
 
@@ -27,7 +27,6 @@
   var ResizeWatcher = new ResizeObserver(resize);
   var YouTubeReady = false;
   var YouTubeQueue = [];
-
   var $Instances = Formstone();
 
   var Options = {
@@ -43,6 +42,23 @@
     youtubeOptions: {} // deprecated
   };
 
+  var Classes = {
+    base: namespace(''),
+    container: namespace('container'),
+    media: namespace('media'),
+    image: namespace('image'),
+    video: namespace('video'),
+    embed: namespace('embed'),
+    animated: namespace('animated'),
+    lazy: namespace('lazy'),
+    responsive: namespace('responsive'),
+    ready: namespace('ready'),
+  }
+
+  var Events = {
+    loaded: 'loaded.background',
+  };
+
   // Internal
 
   /**
@@ -54,6 +70,16 @@
 
   function namespace(string, prefix) {
     return (prefix === false ? '' : 'fs-') + Namespace + (string !== '' ? '-' + string : '');
+  }
+
+  /**
+   * @private
+   * @description Builds selector dotspace.
+   * @param {String} string - String to prefix
+   */
+
+  function dotspace(string) {
+    return '.' + string;
   }
 
   /**
@@ -97,7 +123,7 @@
    */
 
   function cacheInstances() {
-    $Instances = Formstone('.' + namespace(''));
+    $Instances = Formstone(dotspace(Classes.base));
   }
 
   // Private
@@ -129,15 +155,15 @@
 
     data.el = this;
     data.$el = Formstone(this);
-    data.$container = Formstone('<div class="' + namespace('container') + '"></div>');
+    data.$container = Formstone('<div class="' + Classes.container + '"></div>');
 
-    data.thisClasses = [namespace(''), data.guidClass, data.customClass]
+    data.thisClasses = [Classes.base, data.guidClass, data.customClass]
     data.visible = true;
     data.youTubeGuid = 0;
 
     if (data.lazy) {
       data.visible = false;
-      data.thisClasses.push(namespace('lazy'));
+      data.thisClasses.push(Classes.lazy);
     }
 
     data.$el.addClass(data.thisClasses).append(data.$container);
@@ -167,7 +193,7 @@
 
     if (data && !data.visible) {
       data.visible = true;
-      data.$el.removeClass(namespace('lazy'));
+      data.$el.removeClass(Classes.lazy);
 
       data.scrollWatcher.disconnect();
       data.scrollWatcher = null;
@@ -237,13 +263,12 @@
       return;
     }
 
-    var imageClasses = [namespace('media'), namespace('image'), (firstLoad !== true ? namespace('animated') : '')];
+    var imageClasses = [Classes.media, Classes.image, (firstLoad !== true ? Classes.animated : '')];
     var $media = Formstone('<div class="' + imageClasses.join(' ') + '" aria-hidden="true"><img alt="' + data.alt + '"></div>');
     var $img = $media.find('img');
     var newSource = source;
 
-    // Load image
-    $img.on('load', function() {
+    var onImageLoad = function() {
       $media.first().style.backgroundImage = 'url(' + newSource + ')';
 
       // Transition in
@@ -267,11 +292,18 @@
       if (!poster || firstLoad) {
         data.$el.trigger('loaded');
       }
-    }).on('error', loadError)
+
+      $img.off('load', onImageLoad);
+        // .off('error', loadError); // TODO
+    };
+
+    // Load image
+    $img.on('load', onImageLoad)
+      // .on('error', loadError) // TODO
       .attr('src', newSource);
 
     if (data.responsive) {
-      $media.addClass(namespace('responsive'));
+      $media.addClass(Classes.responsive);
     }
 
     data.$container.append($media);
@@ -304,7 +336,7 @@
       firstLoad = false;
     }
 
-    var videoClasses = [namespace('media'), namespace('video'), (firstLoad !== true ? namespace('animated') : '')];
+    var videoClasses = [Classes.media, Classes.video, (firstLoad !== true ? Classes.animated : '')];
     var html = '<div class="' + videoClasses.join(' ') + '" aria-hidden="true">';
 
     html += '<video playsinline';
@@ -333,7 +365,7 @@
     var $media = Formstone(html);
     var $video = $media.find('video');
 
-    $video.on('loadedmetadata', function(e) {
+    var onVideoLoad = function(e) {
       $media.first().style.opacity = 1;
     //   // $media.css({
     //   //   opacity: 1
@@ -349,13 +381,17 @@
 
       doResizeInstance.apply(data.el);
 
-      // data.$el.trigger(Events.loaded); // JQ
+      data.$el.trigger(Events.loaded);
 
       // Events
       if (data.autoPlay) {
         playVideo.apply(data.el);
       }
-    });
+
+      $video.off('loadedmetadata', onVideoLoad);
+    };
+
+    $video.on('loadedmetadata', onVideoLoad);
 
     data.$container.append($media);
   }
@@ -404,7 +440,7 @@
       });
     } else {
       var guid = data.guid + '-' + (data.youTubeGuid++);
-      var youTubeClasses = [namespace('media'), namespace('embed'), (firstLoad !== true ? namespace('animated') : '')];
+      var youTubeClasses = [Classes.media, Classes.embed, (firstLoad !== true ? Classes.animated : '')];
       var html = '<div class="' + youTubeClasses.join(' ') + '" aria-hidden="true">';
 
       html += '<div id="' + guid + '"></div>';
@@ -485,15 +521,15 @@
 
               doResizeInstance.apply(data.el);
 
-              // data.$el.trigger(Events.loaded); // JQ
+              data.$el.trigger(Events.loaded);
             } else if (data.loop && data.playing && e.data === window.YT.PlayerState.ENDED) {
               // fix looping option
               data.player.playVideo();
             }
 
             // Fix for Safari's overly secure security settings...
-            var embed = data.$el.find('.' + namespace('embed'));
-            Formstone(embed).addClass(namespace('ready'));
+            var embed = data.$el.find(dotspace(Classes.embed));
+            Formstone(embed).addClass(Classes.ready);
           },
           onPlaybackQualityChange: function(e) {
             /* console.log("onPlaybackQualityChange", e); */
@@ -503,9 +539,9 @@
           },
           onError: function(e) {
             /* console.log("onError", e); */
-            loadError({
-              data: data
-            });
+            // loadError({
+            //   data: data
+            // });
           },
           onApiChange: function(e) {
             /* console.log("onApiChange", e); */
@@ -530,7 +566,7 @@
       return;
     }
 
-    var $media = data.$container.find('.' + namespace('media'));
+    var $media = data.$container.find(dotspace(Classes.media));
 
     if ($media.nodes.length >= 1) {
       $media.not(':last-child').remove();
@@ -543,7 +579,7 @@
    * @description Error when resource fails to load.
    */
 
-  function loadError(e) {
+  function loadError(e) {  // TODO
     // var data = e.data;
 
     // data.$el.trigger(Events.error); // JQ
@@ -697,7 +733,7 @@
     var data = Formstone.getData(this, Namespace);
 
     if (data) {
-      var $media = data.$container.find('.' + namespace('media'));
+      var $media = data.$container.find(dotspace(Classes.media));
 
       if ($media.nodes.length >= 1) {
         $media.first().style.opacity = 0;
@@ -886,7 +922,7 @@
     }
 
     // Target all media
-    var $allMedia = data.$container.find('.' + namespace('media'));
+    var $allMedia = data.$container.find(dotspace(Classes.media));
 
     $allMedia.each(function(el, i) {
       var $media = Formstone(el);
