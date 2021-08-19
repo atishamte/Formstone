@@ -30,6 +30,8 @@
   };
 
   var Events = {
+    namespace: '.swap',
+    click: 'click.swap',
     activate: 'activate.swap',
     deactivate: 'deactivate.swap',
     enable: 'enable.swap',
@@ -57,7 +59,8 @@
    */
 
   function construct(options) {
-    var data = Formstone.getData(this, Namespace);
+    var $el = Formstone(this);
+    var data = $el.getData(Namespace);
 
     if (data) {
       return;
@@ -70,14 +73,14 @@
       guidClass: namespace(String(GUID).padStart(3, '0')),
       enabled: false,
       active: false,
-    }, Options, options, (Formstone.getData(this, 'swapOptions') || {}));
+    }, Options, options, ($el.getData('swapOptions') || {}));
 
-    Formstone.setData(this, Namespace, data);
+    $el.setData(Namespace, data);
 
     data.classes = $.extend(true, {}, Classes, data.classes);
 
     data.el = this;
-    data.$el = Formstone(this);
+    data.$el = $el;
     data.target = data.$el.data(namespace('target', false));
     data.$target = Formstone(data.target);
 
@@ -98,7 +101,7 @@
     data.$swaps = Formstone(data.el);
     data.$swaps.nodes = data.$swaps.nodes.concat(data.$target.nodes);
 
-    data.$el.on('click', onClick);
+    data.$el.bind(Events.click, onClick);
   }
 
   /**
@@ -107,7 +110,7 @@
    */
 
   function postConstruct() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data) {
       if (!data.collapse && data.group && !Formstone(data.group).filter('[data-' + Namespace + '-active]').length) {
@@ -142,7 +145,7 @@
   function onClick(e) {
     Formstone.killEvent(e);
 
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data) {
       if (data.active && data.collapse) {
@@ -171,7 +174,7 @@
    */
 
    function destroy() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data) {
       if (Formstone.mediaquery) {
@@ -179,9 +182,10 @@
         Formstone.mediaquery('unbind', data.guidClass);
       }
 
-      data.$swaps.removeClass([data.classes.base, data.classes.target, data.classes.enabled, data.classes.active, data.guidClass]).off('click', onClick);
+      data.$swaps.removeClass([data.classes.base, data.classes.target, data.classes.enabled, data.classes.active, data.guidClass])
+        .unbind(Events.namespace);
 
-      Formstone.deleteData(data.el, Namespace);
+      data.$el.deleteData(Namespace);
     }
   }
 
@@ -191,7 +195,7 @@
    */
 
   function activate() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
     var fromLinked = arguments[0];
 
     if (data && data.enabled && !data.active) {
@@ -212,7 +216,7 @@
         }
       }
 
-      data.$el.trigger(Events.activate, [index]);
+      data.$el.trigger(Events.activate, index);
 
       data.active = true;
     }
@@ -224,7 +228,7 @@
    */
 
   function deactivate() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
     var fromLinked = arguments[0];
 
     if (data && data.enabled && data.active) {
@@ -249,7 +253,7 @@
    */
 
   function enable() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
     var fromLinked = arguments[0];
 
     if (data && !data.enabled) {
@@ -280,7 +284,7 @@
    */
 
   function disable() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
     var fromLinked = arguments[0];
 
     if (data && data.enabled) {
@@ -309,5 +313,34 @@
     enable: enable,
     disable: disable,
   });
+
+  /**
+   * @event enable.swap
+   * @description Element has been enabled
+   * @param {Object} e - Event data
+   * @example Formstone('.target').bind('enable.swap', function(e) { ... });
+   */
+
+  /**
+   * @event disable.swap
+   * @description Element has been disabled
+   * @param {Object} e - Event data
+   * @example Formstone('.target').bind('disable.swap', function(e) { ... });
+   */
+
+  /**
+   * @event activate.swap
+   * @description Element has been activated
+   * @param {Object} e - Event data
+   * @param {Number} index - Active index in group, if groupped
+   * @example Formstone('.target').bind('activate.swap', function(e, index) { ... });
+   */
+
+  /**
+   * @event deactivate.swap
+   * @description Element has been deactivated
+   * @param {Object} e - Event data
+   * @example Formstone('.target').bind('deactivate.swap', function(e) { ... });
+   */
 
 })(window, Formstone);

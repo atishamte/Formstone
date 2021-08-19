@@ -40,6 +40,8 @@
     //=include umbrellajs/src/plugins/trigger/trigger.js
     //=include umbrellajs/src/plugins/unique/unique.js
 
+    //=include includes/methods.js
+
     return u;
   })();
 

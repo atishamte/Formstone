@@ -14,7 +14,8 @@
     <link rel="stylesheet" href="/dist/css/navigation.css">
     <link rel="stylesheet" href="/dist/css/tabs.css">
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <!-- <script src="https://cdn.jsdelivr.net/npm/umbrellajs"></script>
     <script src="/dist/js/core-umbrella.js"></script> -->
@@ -170,6 +171,14 @@
 
 <script>
   Formstone.onReady(function() {
+    // Formstone('body').bind('hi.namespace', function() { console.log('hi'); });
+    // Formstone('body').bind('click.anotherspace', function() { console.log('another'); });
+
+    // Formstone('body').bind('click.namespace', function() {
+    //   console.log('BODY CLICK!', Formstone('body').first()._e);
+    // });
+
+
     Formstone('.js-navigation').navigation();
   });
 </script>
@@ -366,16 +375,25 @@ Formstone.onReady(function() {
   Formstone(".js-swap").swap(); //"publicMethod", { var: 'val' });
 
   // TODO make events work
-  Formstone(".js-swap").on('enable.swap', function() { console.log('Enable', arguments); });
-  Formstone(".js-swap").on('disable.swap', function() { console.log('Disable', arguments); });
-  $(".js-swap").on('activate.swap', function() { console.log('Activate', arguments); });
-  $(".js-swap").on('deactivate.swap', function() { console.log('Deactivate', arguments); });
+  Formstone(".js-swap").bind('enable.swap', function() { console.log('Enable', arguments); });
+  Formstone(".js-swap").bind('disable.swap', function() { console.log('Disable', arguments); });
+
+  Formstone(".js-swap").bind('activate.swap', function() { console.log('FS Activate', arguments); });
+  Formstone(".js-swap").bind('deactivate.swap', function() { console.log('FS Deactivate', arguments); });
+
+  $(".js-swap").on('activate.swap', function() { console.log('JQ Activate', arguments); });
+  $(".js-swap").on('deactivate.swap', function() { console.log('JQ Deactivate', arguments); });
 
 
   Formstone(".js-background").background();
 
 
   Formstone(".js-tabs").tabs();
+
+
+  Formstone(".js-tabs").bind('activate.swap', function() { console.log('FS TABS Activate', arguments); });
+  Formstone(".js-tabs").bind('update.tabs', function() { console.log('FS TABS Update', arguments); });
+  // Formstone(".js-tabs").bind('deactivate.tabs', function() { console.log('FS TABS Deactivate', arguments); });
 
   // console.log( Formstone(".js-bg-1").background({ var: 'val' }) );
 
@@ -395,9 +413,9 @@ Formstone.onReady(function() {
 
 
   Formstone.onReady(function() {
-    Formstone('body').on("mqchange", logChange);
+    Formstone('body').bind('change.mediaquery', logChange);
 
-    if (!Formstone.mediaquery("state")) {
+    if (!Formstone.mediaquery('state')) {
       Formstone.mediaquery({
         minWidth     : [ 320, 500, 740, 980, 1220 ],
         maxWidth     : [ 1220, 980, 740, 500, 320 ],
@@ -405,10 +423,10 @@ Formstone.onReady(function() {
         maxHeight    : [ 800, 400 ]
       });
     } else {
-      logChange({}, Formstone.mediaquery("state"));
+      logChange({}, Formstone.mediaquery('state'));
     }
 
-    Formstone.mediaquery("bind", "demo", "(min-width: 740px)", {
+    Formstone.mediaquery('bind', 'demo', '(min-width: 740px)', {
       enter: logBind,
       leave: logBind
     });
@@ -416,13 +434,13 @@ Formstone.onReady(function() {
   });
 
   function logChange(e, state) {
-    var html = "";
-    html += "<p><span>Change:</span><span>MinWidth:</span>" + state.minWidth + "<br>";
-    html += "<span></span><span>MaxWidth:</span>"+ state.maxWidth + "<br>";
-    html += "<span></span><span>MinHeight:</span>"+ state.minHeight + "<br>";
-    html += "<span></span><span>MaxHeight:</span>"+ state.maxHeight + "</p>";
+    var html = '';
+    html += '<p><span>Change:</span><span>MinWidth:</span>' + state.minWidth + '<br>';
+    html += '<span></span><span>MaxWidth:</span>'+ state.maxWidth + '<br>';
+    html += '<span></span><span>MinHeight:</span>'+ state.minHeight + '<br>';
+    html += '<span></span><span>MaxHeight:</span>'+ state.maxHeight + '</p>';
 
-    Formstone(".demo_basic").prepend(html);
+    Formstone('.demo_basic').prepend(html);
   }
 
   function logBind() {
@@ -550,10 +568,40 @@ Formstone.onReady(function() {
   //   console.log("deactivate", this);
   // });
 
-  Formstone(".demo-checkpoint").checkpoint({
+  Formstone('.demo-checkpoint').checkpoint({
     offset: 0,
     intersect: 'middle-top',
     reverse: true
+  });
+
+  $('.demo-checkpoint').on('activate', function() {
+    console.log('jq activate plain!');
+  });
+  $('.demo-checkpoint').on('activate.checkpoint', function() {
+    console.log('jq activate namespace!');
+  });
+  $('.demo-checkpoint').on('activate.otherspace', function() {
+    console.log('jq activate otherspace!');
+  });
+
+  Formstone('.demo-checkpoint').on('activate', function() {
+    console.log('fs on activate plain!');
+  });
+  Formstone('.demo-checkpoint').on('activate.checkpoint', function() {
+    console.log('fs on activate namespace!');
+  });
+  Formstone('.demo-checkpoint').on('activate.otherspace', function() {
+    console.log('fs on activate otherspace!');
+  });
+
+  Formstone('.demo-checkpoint').bind('activate', function() {
+    console.log('fs activate plain!');
+  });
+  Formstone('.demo-checkpoint').bind('activate.checkpoint', function() {
+    console.log('fs activate namespace!');
+  });
+  Formstone('.demo-checkpoint').bind('activate.otherspace', function() {
+    console.log('fs activate otherspace!');
   });
 
   // Formstone("body").find(".js-demo_tabs").on("update.tabs", function() {
@@ -784,7 +832,7 @@ Formstone.onReady(function() {
     Overlay Left
   </nav>
 
-  <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_overlay_right" data-navigation-content=".demo_content" data-navigation-options='{"type":"overlay","gravity":"right","maxWidth":"10000px"}'>
+  <!-- <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_overlay_right" data-navigation-content=".demo_content" data-navigation-options='{"type":"overlay","gravity":"right","maxWidth":"10000px"}'>
     Overlay Right
   </nav>
 
@@ -802,7 +850,7 @@ Formstone.onReady(function() {
 
   <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_push_right" data-navigation-content=".demo_content" data-navigation-options='{"type":"push","gravity":"right","maxWidth":"10000px"}'>
     Push Right
-  </nav>
+  </nav> -->
 
 </div>
 

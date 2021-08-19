@@ -36,6 +36,10 @@
     maxHeight: 'max-height'
   };
 
+  var Events = {
+    change: 'change.mediaquery',
+  }
+
   // Private
 
   /**
@@ -131,7 +135,7 @@
   function onStateChange() {
     setState();
 
-    Formstone('body').trigger('mqchange', State);
+    Formstone('body').trigger(Events.change, State);
   }
 
   /**
@@ -282,5 +286,13 @@
     unbind: unbind,
     state: getState,
   });
+
+  /**
+   * @event change.mediaquery
+   * @description MediaQuery state has changed; Fired on 'body' element
+   * @param {Object} e - Event data
+   * @param {Object} state - Current state
+   * @example Formstone('body').bind('change.mediaquery', function(e, state) { ... });
+   */
 
 })(window, Formstone);

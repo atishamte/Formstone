@@ -56,7 +56,10 @@
   }
 
   var Events = {
+    namespace: '.background',
+    load: 'load.background',
     loaded: 'loaded.background',
+    error: 'error.background',
   };
 
   // Internal
@@ -134,7 +137,8 @@
    */
 
   function construct(options) {
-    var data = Formstone.getData(this, Namespace);
+    var $el = Formstone(this);
+    var data = $el.getData(Namespace);
 
     if (data) {
       return;
@@ -149,12 +153,12 @@
       guidClass: namespace(String(GUID).padStart(3, '0')),
       enabled: false,
       active: false,
-    }, Options, options, (Formstone.getData(this, 'backgroundOptions') || {}));
+    }, Options, options, ($el.getData('backgroundOptions') || {}));
 
-    Formstone.setData(this, Namespace, data);
+    $el.setData(Namespace, data);
 
     data.el = this;
-    data.$el = Formstone(this);
+    data.$el = $el;
     data.$container = Formstone('<div class="' + Classes.container + '"></div>');
 
     data.thisClasses = [Classes.base, data.guidClass, data.customClass]
@@ -189,7 +193,7 @@
    */
 
   function loadInstance() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data && !data.visible) {
       data.visible = true;
@@ -208,7 +212,7 @@
    */
 
   function loadInitialSource() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data && data.visible) {
       var source = data.source;
@@ -225,7 +229,7 @@
    */
 
   function calculateSource() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data) {
       return;
@@ -257,7 +261,7 @@
    */
 
   function loadImage(source, poster, firstLoad) {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data) {
       return;
@@ -290,16 +294,16 @@
       doResizeInstance.apply(data.el);
 
       if (!poster || firstLoad) {
-        data.$el.trigger('loaded');
+        data.$el.trigger(Events.loaded);
       }
 
-      $img.off('load', onImageLoad);
-        // .off('error', loadError); // TODO
+      $img.unbind(Events.load, onImageLoad);
+        // .unbind(Events.error, loadError); // TODO
     };
 
     // Load image
-    $img.on('load', onImageLoad)
-      // .on('error', loadError) // TODO
+    $img.bind(Events.load, onImageLoad)
+      // .bind(Events.error, loadError) // TODO
       .attr('src', newSource);
 
     if (data.responsive) {
@@ -324,7 +328,7 @@
    */
 
   function loadVideo(source, firstLoad) {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data) {
       return;
@@ -388,10 +392,10 @@
         playVideo.apply(data.el);
       }
 
-      $video.off('loadedmetadata', onVideoLoad);
+      $video.unbind('loadedmetadata', onVideoLoad);
     };
 
-    $video.on('loadedmetadata', onVideoLoad);
+    $video.bind('loadedmetadata', onVideoLoad);
 
     data.$container.append($media);
   }
@@ -404,7 +408,7 @@
    */
 
   function loadYouTube(source, firstLoad) {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data) {
       return;
@@ -560,7 +564,7 @@
    */
 
   function cleanMedia() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data) {
       return;
@@ -582,7 +586,7 @@
   function loadError(e) {  // TODO
     // var data = e.data;
 
-    // data.$el.trigger(Events.error); // JQ
+    data.$el.trigger(Events.error); // JQ
   }
 
   // Public
@@ -604,13 +608,13 @@
    */
 
   function destroy() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data) {
       data.$container.remove();
 
-      data.$el.removeClass(data.thisClasses);
-        // .off(Events.namespace); // JQ
+      data.$el.removeClass(data.thisClasses)
+        .unbind(Events.namespace);
 
       data.scrollWatcher.disconnect();
       data.scrollWatcher = null;
@@ -639,7 +643,7 @@
    */
 
   function loadMedia(source, firstLoad) {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data) {
       return;
@@ -730,7 +734,7 @@
    */
 
   function unloadMedia(data) {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data) {
       var $media = data.$container.find(dotspace(Classes.media));
@@ -766,7 +770,7 @@
    */
 
   function pauseVideo() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data && data.video && data.playing) {
       if (data.isYouTube) {
@@ -800,7 +804,7 @@
    */
 
   function playVideo() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data && data.video && !data.playing) {
       if (data.isYouTube) {
@@ -833,7 +837,7 @@
    */
 
   function muteVideo() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data && data.video) {
       if (data.isYouTube && data.playerReady) {
@@ -862,7 +866,7 @@
    */
 
   function unmuteVideo(data) {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data && data.video) {
       if (data.isYouTube && data.playerReady) {
@@ -886,7 +890,7 @@
    */
 
   function resizeInstance() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data && data.visible) {
       if (data.responsive) {
@@ -915,7 +919,7 @@
    */
 
   function doResizeInstance() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data) {
       return;
@@ -988,5 +992,17 @@
 
     YouTubeQueue = [];
   };
+
+  /**
+   * @event loaded.background
+   * @description Media has successfully loaded
+   * @example Formstone('.target').bind('loaded.background', function(e) { ... });
+   */
+
+  /**
+   * @event error.background
+   * @description Media has failed to load
+   * @example Formstone('.target').bind('error.background', function(e) { ... });
+   */
 
 })(window, Formstone);

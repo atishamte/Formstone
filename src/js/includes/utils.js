@@ -52,37 +52,37 @@ Formstone.extend = function() {
 
 // Data
 
-Formstone.getData = function(el, key) {
-  var val = null;
+// Formstone.getData = function(el, key) {
+//   var val = null;
 
-  if (Storage.exists(el, key)) {
-    return Storage.get(el, key);
-  }
+//   if (Storage.exists(el, key)) {
+//     return Storage.get(el, key);
+//   }
 
-  if (key in el.dataset) {
-    val = el.dataset[key];
-  }
+//   if (key in el.dataset) {
+//     val = el.dataset[key];
+//   }
 
-  try {
-    var test = JSON.parse(val);
+//   try {
+//     var test = JSON.parse(val);
 
-    if (Formstone.isObject(test)) {
-      val = test;
-    }
-  } catch (error) {
-    // Shh
-  }
+//     if (Formstone.isObject(test)) {
+//       val = test;
+//     }
+//   } catch (error) {
+//     // Shh
+//   }
 
-  return val;
-};
+//   return val;
+// };
 
-Formstone.setData = function(el, key, data) {
-  Storage.set(el, key, data);
-};
+// Formstone.setData = function(el, key, data) {
+//   Storage.set(el, key, data);
+// };
 
-Formstone.deleteData = function(el, key) {
-  Storage.delete(el, key);
-};
+// Formstone.deleteData = function(el, key) {
+//   Storage.delete(el, key);
+// };
 
 Formstone.killEvent = function(e, immediate) {
   try {

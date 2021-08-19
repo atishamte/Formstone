@@ -37,6 +37,7 @@
   };
 
   var Events = {
+    namespace: '.checkpoint',
     load: 'load.checkpoint',
     activate: 'activate.checkpoint',
     deactivate: 'deactivate.checkpoint',
@@ -150,7 +151,8 @@
    */
 
   function construct(options) {
-    var data = Formstone.getData(this, Namespace);
+    var $el = Formstone(this);
+    var data = $el.getData(Namespace);
 
     if (data) {
       return;
@@ -165,17 +167,17 @@
       guidClass: namespace(String(GUID).padStart(3, '0')),
       initialized: false,
       visible: false,
-    }, Options, options, (Formstone.getData(this, 'checkpointOptions') || {}));
+    }, Options, options, ($el.getData('checkpointOptions') || {}));
 
-    Formstone.setData(this, Namespace, data);
+    $el.setData(Namespace, data);
 
     data.el = this;
-    data.$el = Formstone(this);
+    data.$el = $el;
 
-    var dataParent = Formstone.getData(data.el, 'checkpointParent');
-    var dataContainer = Formstone.getData(data.el, 'checkpointContainer');
-    var dataIntersect = Formstone.getData(data.el, 'checkpointIntersect');
-    var dataOffset = Formstone.getData(data.el, 'checkpointOffset');
+    var dataParent = data.$el.getData('checkpointParent');
+    var dataContainer = data.$el.getData('checkpointContainer');
+    var dataIntersect = data.$el.getData('checkpointIntersect');
+    var dataOffset = data.$el.getData('checkpointOffset');
 
     var $parent = Formstone(dataParent);
     var $container = Formstone(dataContainer);
@@ -216,7 +218,7 @@
    */
 
   function rafInstance() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data || !data.hasParent) {
       return;
@@ -237,7 +239,7 @@
    */
 
   function checkInstance() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data || !data.initialized) {
       return;
@@ -283,7 +285,7 @@
    */
 
   function destroy() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data) {
       data.$el.removeClass([namespace(''), namespace('active')]);
@@ -304,7 +306,7 @@
    */
 
   function resizeInstance(data) {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data) {
       return;
@@ -364,5 +366,17 @@
     destroy: destroy,
     resize: resizeInstance,
   });
+
+  /**
+   * @event activate.checkpoint
+   * @description Element has been activated
+   * @example Formstone('.target').on('activate.checkpoint', function(e) { ... });
+   */
+
+  /**
+   * @event deactivate.checkpoint
+   * @description Element has been deactivated
+   * @example Formstone('.target').on('deactivate.checkpoint', function(e) { ... });
+   */
 
 })(window, Formstone);

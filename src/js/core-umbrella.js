@@ -2,6 +2,8 @@
 
   // Core
 
+  //=include includes/methods.js
+
   var Formstone = u;
 
   //=include includes/plugin.js

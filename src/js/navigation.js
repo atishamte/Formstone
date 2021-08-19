@@ -53,8 +53,20 @@
   };
 
   var Events = {
+    namespace: '.navigation',
     open: 'open.navigation',
     close: 'close.navigation',
+    blur: 'blur.navigation',
+    focus: 'focus.navigation',
+    click: 'click.navigation',
+    keypress: 'keypress.navigation',
+    swap: {
+      namespace: '.swap',
+      activate: 'activate.swap',
+      deactivate: 'deactivate.swap',
+      enable: 'enable.swap',
+      disable: 'disable.swap',
+    }
   }
 
   // Internal
@@ -99,7 +111,8 @@
    */
 
   function construct(options) {
-    var data = Formstone.getData(this, Namespace);
+    var $el = Formstone(this);
+    var data = $el.getData(Namespace);
 
     if (data) {
       return;
@@ -115,14 +128,14 @@
       enabled: false,
       open: false,
       // gravity: '',
-    }, Options, options, (Formstone.getData(this, 'navigationOptions') || {}));
+    }, Options, options, ($el.getData('navigationOptions') || {}));
 
-    Formstone.setData(this, Namespace, data);
+    $el.setData(Namespace, data);
 
     data.el = this;
-    data.$el = Formstone(this);
-    data.handle = Formstone.getData(this, 'navigationHandle');
-    data.content = Formstone.getData(this, 'navigationContent');
+    data.$el = $el;
+    data.handle = data.$el.getData('navigationHandle');
+    data.content = data.$el.getData('navigationContent');
 
     // guid
     data.guidHandle = data.guidClass + '-handle';
@@ -140,7 +153,6 @@
     var classGroup = [data.guidClass, data.customClass];
 
     data.handleClasses = [
-      // Classes.handle,
       Classes.handle.replace(baseClass, typeClass),
       gravityClass ? Classes.handle.replace(baseClass, gravityClass) : '',
       data.guidHandle,
@@ -170,7 +182,7 @@
     data.$content = Formstone(data.content).addClass(data.contentClasses);
 
     if (data.content) {
-      data.$animate = Formstone([ dotspace(Classes.nav)+dotspace(data.guidClass), data.content ]);
+      data.$animate = Formstone([ dotspace(Classes.nav) + dotspace(data.guidClass), data.content ].join(', '));
     } else {
       data.$animate = data.$nav;
     }
@@ -199,15 +211,15 @@
       .attr('data-swap-linked', dotspace(data.guidHandle))
       .attr('data-swap-group', Classes.base)
       .attr('tabindex', 0)
-      .on('activate.swap', onOpen)
-      .on('deactivate.swap', onClose)
-      .on('enable.swap', onEnable)
-      .on('disable.swap', onDisable)
-      .on('focus', onFocus)
-      .on('blur', onBlur);
+      .bind(Events.swap.activate, onOpen)
+      .bind(Events.swap.deactivate, onClose)
+      .bind(Events.swap.enable, onEnable)
+      .bind(Events.swap.disable, onDisable)
+      .bind(Events.focus, onFocus)
+      .bind(Events.blur, onBlur);
 
     if (!data.$handle.is('a, button')) {
-      data.$handle.on('keypress', onKeyup);
+      data.$handle.bind(Events.keypress, onKeyup);
     }
   }
 
@@ -217,7 +229,7 @@
    */
 
    function postConstruct() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data) {
       return;
@@ -241,8 +253,8 @@
 
     function onFocus(e) {
       var target = Formstone(this).data('swap-target');
-      var nav = Formstone(target).first();
-      var data = Formstone.getData(nav, Namespace);
+      var $nav = Formstone(target);
+      var data = $nav.getData(Namespace);
 
       if (data) {
         data.$handle.addClass(Classes.focus);
@@ -257,8 +269,8 @@
 
     function onBlur(e) {
       var target = Formstone(this).data('swap-target');
-      var nav = Formstone(target).first();
-      var data = Formstone.getData(nav, Namespace);
+      var $nav = Formstone(target);
+      var data = $nav.getData(Namespace);
 
       if (data) {
         data.$handle.removeClass(Classes.focus);
@@ -273,8 +285,8 @@
 
     function onKeyup(e) {
       var target = Formstone(this).data('swap-target');
-      var nav = Formstone(target).first();
-      var data = Formstone.getData(nav, Namespace);
+      var $nav = Formstone(target);
+      var data = $nav.getData(Namespace);
 
       if (data && (e.keyCode === 13 || e.keyCode === 32)) {
         Formstone.killEvent(e);
@@ -291,17 +303,17 @@
 
     function onOpen(e) {
       var target = Formstone(this).data('swap-target');
-      var nav = Formstone(target+dotspace(Classes.nav)).first();
-      var data = Formstone.getData(nav, Namespace);
+      var nav = Formstone(target + dotspace(Classes.nav)).first();
+      var data = Formstone(nav).getData(Namespace);
 
       if (data && !data.open) {
         data.$el.trigger(Events.open)
           .attr('aria-hidden', false);
 
         data.$content.addClass(data.contentClassesOpen)
-          // .one(Events.click, function() {
-          //   close(data);
-          // });
+          .bind(Events.click, function() {
+            close.apply(nav);
+          });
 
         data.$handle.attr('aria-expanded', true);
 
@@ -325,18 +337,16 @@
 
   function onClose(e) {
     var target = Formstone(this).data('swap-target');
-    var nav = Formstone(target).first();
-    var data = Formstone.getData(nav, Namespace);
+    var nav = Formstone(target + dotspace(Classes.nav)).first();
+    var data = Formstone(nav).getData(Namespace);
 
     if (data && data.open) {
       data.$el.trigger(Events.close)
         .attr('aria-hidden', true);
 
       data.$content.removeClass(data.contentClassesOpen)
-        .off('activate.swap', onOpen)
-        .off('deactivate.swap', onClose)
-        .off('enable.swap', onEnable)
-        .off('disable.swap', onDisable);
+        .unbind(Events.swap.namespace)
+        .unbind(Events.namespace);
 
       data.$handle.attr('aria-expanded', false);
 
@@ -360,8 +370,8 @@
 
   function onEnable(e) {
     var target = Formstone(this).data('swap-target');
-    var nav = Formstone(target).first();
-    var data = Formstone.getData(nav, Namespace);
+    var nav = Formstone(target + dotspace(Classes.nav)).first();
+    var data = Formstone(nav).getData(Namespace);
 
     if (data) {
       data.$el.attr('aria-hidden', 'true');
@@ -387,13 +397,11 @@
 
   function onDisable(e) {
     var target = Formstone(this).data('swap-target');
-    var nav = Formstone(target).first();
-    var data = Formstone.getData(nav, Namespace);
+    var nav = Formstone(target + dotspace(Classes.nav)).first();
+    var data = Formstone(nav).getData(Namespace);
 
     if (data) {
-      data.el.removeAttribute('aria-hidden');
-      data.handle.removeAttribute('aria-controls');
-      data.handle.removeAttribute('aria-expanded');
+      data.$el.removeAttr(['aria-hidden', 'aria-controls', 'aria-expanded']);
       data.$content.removeClass([Classes.enabled, Classes.animated]);
       data.$animate.removeClass(Classes.animated);
 
@@ -483,27 +491,20 @@
    */
 
   function destroy() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (!data) {
       return;
     }
 
-    data.$content.removeClass(data.contentClasses, data.contentClassesOpen);
+    data.$content.removeClass(data.contentClasses, data.contentClassesOpen)
+      .unbind(Events.namespace);
       // .off(Events.namespace);
 
-    data.handle.removeAttrribute('aria-controls');
-    data.handle.removeAttrribute('aria-expanded');
-    data.handle.removeAttrribute('data-swap-target');
-    data.handle.removeAttrribute('data-swap-linked');
-    data.handle.removeAttrribute('data-swap-group');
-    data.$handle.removeClass(data.handleClasses)
-      .off('activate.swap', onOpen)
-      .off('deactivate.swap', onClose)
-      .off('enable.swap', onEnable)
-      .off('disable.swap', onDisable)
-      .off('focus', onFocus)
-      .off('blur', onBlur)
+    data.$handle.removeAttr(['aria-controls', 'aria-expanded', 'data-swap-target', 'data-swap-linked', 'data-swap-group'])
+      .removeClass(data.handleClasses)
+      .unbind(Events.swap.namespace)
+      .unbind(Events.namespace)
       .html(data.originalLabel)
       .swap('destroy');
 
@@ -513,12 +514,14 @@
 
     clearLocks(data);
 
-    data.el.removeAttribute('aria-hidden');
-    data.$el.removeClass(data.thisClasses);
+    data.$el.removeAttr('aria-hidden')
+      .removeClass(data.thisClasses);
 
     if (data.$el.attr('id') === data.guidClass) {
-      data.el.removeAttribute('id');
+      data.$el.removeAttr('id');
     }
+
+    Formstone.deleteData(data.el, Namespace);
   }
 
   /**
@@ -527,7 +530,7 @@
    */
 
   function open() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data) {
       data.$handle.swap('activate');
@@ -540,7 +543,7 @@
    */
 
   function close() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data) {
       data.$handle.swap('deactivate');
@@ -553,7 +556,7 @@
    */
 
    function enable() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data) {
       data.$handle.swap('enable');
@@ -566,7 +569,7 @@
    */
 
   function disable() {
-    var data = Formstone.getData(this, Namespace);
+    var data = Formstone(this).getData(Namespace);
 
     if (data) {
       data.$handle.swap('disable');
@@ -585,5 +588,19 @@
     enable: enable,
     disable: disable,
   });
+
+  /**
+   * @event open.navigation
+   * @description Navigation has been opened
+   * @param {Object} e - Event data
+   * @example Formstone('.target').bind('open.navigation', function(e) { ... });
+   */
+
+  /**
+   * @event close.navigation
+   * @description Navigation has been closed
+   * @param {Object} e - Event data
+   * @example Formstone('.target').bind('close.navigation', function(e) { ... });
+   */
 
 })(window, Formstone);
