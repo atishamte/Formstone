@@ -50,7 +50,7 @@
         padding: 0;
       }
 
-      body {
+      .demo_content {
         padding: 20px;
       }
 
@@ -160,6 +160,18 @@
       }
       .swap_target.fs-swap-active:before {
         content: 'active ';
+      }
+
+
+      .demo_content {
+        background: white;
+      }
+      .fs-navigation-nav.fs-navigation-enabled {
+        /* background: gray; */
+      }
+
+      .fs-navigation-enabled {
+        --fs-navigation-offscreen-background: lightgray;
       }
 
     </style>
@@ -832,7 +844,7 @@ Formstone.onReady(function() {
     Overlay Left
   </nav>
 
-  <!-- <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_overlay_right" data-navigation-content=".demo_content" data-navigation-options='{"type":"overlay","gravity":"right","maxWidth":"10000px"}'>
+  <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_overlay_right" data-navigation-content=".demo_content" data-navigation-options='{"type":"overlay","gravity":"right","maxWidth":"10000px"}'>
     Overlay Right
   </nav>
 
@@ -844,13 +856,14 @@ Formstone.onReady(function() {
     Reveal Right
   </nav>
 
+
   <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_push_left" data-navigation-content=".demo_content" data-navigation-options='{"type":"push","gravity":"left","maxWidth":"10000px"}'>
     Push Left
   </nav>
 
   <nav class="nav_offscreen js-navigation" data-navigation-handle=".nav_handle_push_right" data-navigation-content=".demo_content" data-navigation-options='{"type":"push","gravity":"right","maxWidth":"10000px"}'>
     Push Right
-  </nav> -->
+  </nav>
 
 </div>
 

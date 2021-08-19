@@ -153,6 +153,7 @@
     var classGroup = [data.guidClass, data.customClass];
 
     data.handleClasses = [
+      Classes.handle,
       Classes.handle.replace(baseClass, typeClass),
       gravityClass ? Classes.handle.replace(baseClass, gravityClass) : '',
       data.guidHandle,

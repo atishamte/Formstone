@@ -26,18 +26,20 @@
 .fs-checkpoint[data-checkpoint-animation="flip-left"] // flip left animation
 .fs-checkpoint[data-checkpoint-animation="flip-right"] // flip right animation
 
- */
+*/
 
-@fs-checkpoint-offset: 50px;
 @fs-checkpoint-duration: 0.5s;
+@fs-checkpoint-offset: 50px;
 @fs-checkpoint-scale-in: 0.5;
 @fs-checkpoint-scale-out: 1.25;
 @fs-checkpoint-rotate: 91deg;
 @fs-checkpoint-perspective: 3000px;
 
+//
+
 .fs-checkpoint {
-  --fs-checkpoint-offset: @fs-checkpoint-offset;
   --fs-checkpoint-duration: @fs-checkpoint-duration;
+  --fs-checkpoint-offset: @fs-checkpoint-offset;
   --fs-checkpoint-scale-in: @fs-checkpoint-scale-in;
   --fs-checkpoint-scale-out: @fs-checkpoint-scale-out;
   --fs-checkpoint-rotate: @fs-checkpoint-rotate;

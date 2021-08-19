@@ -1,43 +1,127 @@
-/**
- * @component
- * @name Number
- */
+/*
 
-@import "imports/utils.less";
+.fs-navigation // base class
+.fs-navigation.fs-navigation-enabled // plugin enabled
 
-// Config
+.fs-navigation-lock // html, body lock state
+
+.fs-navigation-nav // navigation elements
+.fs-navigation-nav.fs-navigation-enabled // plugin enabled
+.fs-navigation-nav.fs-navigation-open // open state
+.fs-navigation-nav.fs-navigation-animated // animated state
+
+.fs-navigation-handle // handle elements
+.fs-navigation-handle.fs-navigation-enabled // plugin enabled
+.fs-navigation-handle.fs-navigation-open // open state
+
+// Toggle
+
+.fs-navigation-toggle-nav // toggle display
+.fs-navigation-toggle-nav.fs-navigation-enabled // plugin enabled
+.fs-navigation-toggle-nav.fs-navigation-open // open state
+
+.fs-navigation-toggle-handle // toggle handle
+.fs-navigation-toggle-handle.fs-navigation-enabled // plugin enabled
+.fs-navigation-toggle-handle.fs-navigation-open // open state
+.fs-navigation-toggle-handle.fs-navigation-animated // animated state
+
+// Overlay
+
+.fs-navigation-overlay-nav // overlay display
+.fs-navigation-overlay-nav.fs-navigation-enabled // plugin enabled
+.fs-navigation-overlay-nav.fs-navigation-open // open state
+.fs-navigation-overlay-nav.fs-navigation-animated // animated state
+.fs-navigation-overlay-left-nav // left nav
+.fs-navigation-overlay-right-nav // right nav
+
+.fs-navigation-overlay-handle // overlay handle
+.fs-navigation-overlay-handle.fs-navigation-enabled // plugin enabled
+.fs-navigation-overlay-handle.fs-navigation-open // open state
+
+.fs-navigation-overlay-content // overlay content
+.fs-navigation-overlay-content:before // overlay content before
+.fs-navigation-overlay-content.fs-navigation-enabled // plugin enabled
+.fs-navigation-overlay-content.fs-navigation-open // open state
+.fs-navigation-overlay-content.fs-navigation-animated // animated state
+
+// Push
+
+.fs-navigation-push-nav // push display
+.fs-navigation-push-nav.fs-navigation-enabled // plugin enabled
+.fs-navigation-push-nav.fs-navigation-open // open state
+.fs-navigation-push-nav.fs-navigation-animated // animated state
+.fs-navigation-push-left-nav // left nav
+.fs-navigation-push-right-nav // right nav
+
+.fs-navigation-push-handle // push handle
+.fs-navigation-push-handle.fs-navigation-enabled // plugin enabled
+.fs-navigation-push-handle.fs-navigation-open // open state
+
+.fs-navigation-push-content // push content
+.fs-navigation-push-content.fs-navigation-enabled // plugin enabled
+.fs-navigation-push-content.fs-navigation-open // open state
+.fs-navigation-push-content.fs-navigation-animated // animated state
+
+// Reveal
+
+.fs-navigation-reveal-nav // reveal display
+.fs-navigation-reveal-nav.fs-navigation-enabled // plugin enabled
+.fs-navigation-reveal-nav.fs-navigation-open // open state
+.fs-navigation-reveal-nav.fs-navigation-animated // animated state
+.fs-navigation-reveal-left-nav // left nav
+.fs-navigation-reveal-right-nav // right nav
+
+.fs-navigation-reveal-handle // handle
+.fs-navigation-reveal-handle.fs-navigation-enabled // plugin enabled
+.fs-navigation-reveal-handle.fs-navigation-open // open state
+
+.fs-navigation-reveal-content // reveal content
+.fs-navigation-reveal-content.fs-navigation-enabled // plugin enabled
+.fs-navigation-reveal-content.fs-navigation-open // open state
+.fs-navigation-reveal-content.fs-navigation-animated // animated state
+
+*/
 
 @fs-navigation-offscreen-background: #fff;
 @fs-navigation-offscreen-width: 270px;
 @fs-navigation-offscreen-zindex: 0;
 
-@fs-navigation-offscreen-transition-speed: 0.2s;
+@fs-navigation-offscreen-transition-duration: 0.2s;
 @fs-navigation-offscreen-transition-timing: ease;
 
 @fs-navigation-overlay-zindex: 3;
 
 @fs-navigation-overlay-content-background: #fff;
-@fs-navigation-overlay-content-opacity: 75;
+@fs-navigation-overlay-content-opacity: 0.75;
 @fs-navigation-overlay-content-zindex: 2;
 
 @fs-navigation-push-zindex: 0;
 @fs-navigation-push-content-zindex: 1;
 
-/**
- * @class
- * @name .fs-navigation-element
- * @type element
- * @description Target elmement
- */
-
-/**
- * @class
- * @name .fs-navigation
- * @type element
- * @description Base widget class
- */
+//
 
 .fs-navigation {
+
+  &-enabled {
+  // &-handle,
+  // &-content {
+    --fs-navigation-offscreen-background: @fs-navigation-offscreen-background;
+    --fs-navigation-offscreen-width: @fs-navigation-offscreen-width;
+    --fs-navigation-offscreen-zindex: @fs-navigation-offscreen-zindex;
+
+    --fs-navigation-offscreen-transition-duration: @fs-navigation-offscreen-transition-duration;
+    --fs-navigation-offscreen-transition-timing: @fs-navigation-offscreen-transition-timing;
+
+    --fs-navigation-overlay-zindex: @fs-navigation-overlay-zindex;
+    --fs-navigation-overlay-content-background: @fs-navigation-overlay-content-background;
+    --fs-navigation-overlay-content-opacity: @fs-navigation-overlay-content-opacity;
+    --fs-navigation-overlay-content-zindex: @fs-navigation-overlay-content-zindex;
+
+    --fs-navigation-push-zindex: @fs-navigation-push-zindex;
+    --fs-navigation-push-content-zindex: @fs-navigation-push-content-zindex;
+  }
+
+  //
 
   &&-enabled {
 
@@ -54,56 +138,17 @@
     user-select: none !important;
   }
 
-  /**
-   * @class
-   * @name .fs-navigation-toggle-nav
-   * @type element
-   * @description Toggle navigation
-   */
-  /**
-   * @class
-   * @name .fs-navigation-toggle-nav.fs-navigation-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
+  // Toggle
 
   &-toggle-nav&-enabled {
     display: none;
   }
 
-  /**
-   * @class
-   * @name .fs-navigation-toggle-nav.fs-navigation-open
-   * @type modifier
-   * @description Indicates open state
-   */
-
   &-toggle-nav&-open {
     display: block;
   }
 
-  /**
-   * @class
-   * @name .fs-navigation-toggle-handle
-   * @type element
-   * @description Toggle handle
-   */
-  /**
-   * @class
-   * @name .fs-navigation-toggle-handle.fs-navigation-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-toggle-handle.fs-navigation-open
-   * @type modifier
-   * @description Indicates open state
-   */
-
   &-toggle-handle&-enabled {
-    .fs_button;
-
     width: 100%;
 
     cursor: pointer;
@@ -114,128 +159,19 @@
 
   }
 
-  /**
-   * @class
-   * @name .fs-navigation-overlay-nav
-   * @type element
-   * @description Overlay nav
-   */
-  /**
-   * @class
-   * @name .fs-navigation-overlay-nav.fs-navigation-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-overlay-nav.fs-navigation-animated
-   * @type modifier
-   * @description Indicates animated state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-overlay-nav.fs-navigation-open
-   * @type modifier
-   * @description Indicates open state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-overlay-left-nav
-   * @type modifier
-   * @description Indicates left hand nav
-   */
-  /**
-   * @class
-   * @name .fs-navigation-overlay-right-nav
-   * @type modifier
-   * @description Indicates right hand nav
-   */
-
-  /**
-   * @class
-   * @name .fs-navigation-push-nav
-   * @type element
-   * @description Push nav
-   */
-  /**
-   * @class
-   * @name .fs-navigation-push-nav.fs-navigation-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-push-nav.fs-navigation-animated
-   * @type modifier
-   * @description Indicates animated state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-push-nav.fs-navigation-open
-   * @type modifier
-   * @description Indicates open state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-push-left-nav
-   * @type modifier
-   * @description Indicates left hand nav
-   */
-  /**
-   * @class
-   * @name .fs-navigation-push-right-nav
-   * @type modifier
-   * @description Indicates right hand nav
-   */
-
-  /**
-   * @class
-   * @name .fs-navigation-reveal-nav
-   * @type element
-   * @description Reveal nav
-   */
-  /**
-   * @class
-   * @name .fs-navigation-reveal-nav.fs-navigation-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-reveal-nav.fs-navigation-animated
-   * @type modifier
-   * @description Indicates animated state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-reveal-nav.fs-navigation-open
-   * @type modifier
-   * @description Indicates open state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-reveal-left-nav
-   * @type modifier
-   * @description Indicates left hand nav
-   */
-  /**
-   * @class
-   * @name .fs-navigation-reveal-right-nav
-   * @type modifier
-   * @description Indicates right hand nav
-   */
+  // Overlay, Push, Reveal Nav
 
   &-push-nav&-enabled,
   &-reveal-nav&-enabled,
   &-overlay-nav&-enabled {
-    width: @fs-navigation-offscreen-width;
+    width: var(--fs-navigation-offscreen-width);
     height: 100%;
-    height: ~"calc(100% + 60px)";
+    height: ~'calc(100% + 60px)';
 
     position: fixed;
     top: 0;
 
-    background: @fs-navigation-offscreen-background;
+    background: var(--fs-navigation-offscreen-background);
     display: block;
     overflow: auto;
 
@@ -245,25 +181,23 @@
   &-push-nav&-enabled,
   &-reveal-nav&-enabled {
     visibility: hidden;
+    z-index: var(--fs-navigation-push-zindex);
   }
 
+  // animated
+
   &-reveal-nav&-animated {
-    transition: visibility 0.001s linear @fs-navigation-offscreen-transition-speed; // delay when closing
+    transition: visibility 0.001s linear var(--fs-navigation-offscreen-transition-duration); // delay when closing
   }
 
   &-push-nav&-animated,
   &-overlay-nav&-animated {
     transition:
-      transform @fs-navigation-offscreen-transition-speed @fs-navigation-offscreen-transition-timing,
-      visibility 0.001s linear @fs-navigation-offscreen-transition-speed; // delay when closing
+      transform var(--fs-navigation-offscreen-transition-duration) var(--fs-navigation-offscreen-transition-timing),
+      visibility 0.001s linear var(--fs-navigation-offscreen-transition-duration); // delay when closing
   }
 
-  // reveal / push / overlay
-
-  &-push-nav&-enabled,
-  &-reveal-nav&-enabled {
-    z-index: @fs-navigation-push-zindex;
-  }
+  // left / right
 
   &-push-left-nav&-enabled,
   &-reveal-left-nav&-enabled,
@@ -277,26 +211,22 @@
     right: 0;
   }
 
-  // reveal
-
-
-
   // push / overlay
 
   &-push-left-nav&-enabled,
   &-overlay-left-nav&-enabled {
-    transform: translate3D(-(@fs-navigation-offscreen-width), 0, 0);
+    transform: ~'translate3D( calc(var(--fs-navigation-offscreen-width) * -1), 0, 0)';
   }
 
   &-push-right-nav&-enabled,
   &-overlay-right-nav&-enabled {
-    transform: translate3D(@fs-navigation-offscreen-width, 0, 0);
+    transform: translate3D(var(--fs-navigation-offscreen-width), 0, 0);
   }
 
   // overlay
 
   &-overlay-nav&-enabled {
-    z-index: @fs-navigation-overlay-zindex;
+    z-index: var(--fs-navigation-overlay-zindex);
   }
 
   &-overlay-left-nav&-enabled {
@@ -311,185 +241,75 @@
 
   &-reveal-nav&-open {
     visibility: visible;
-    transition: visibility 0.001s @fs-navigation-offscreen-transition-timing;
+    transition: visibility 0.001s var(--fs-navigation-offscreen-transition-timing);
   }
 
   &-push-nav&-open,
   &-overlay-nav&-open {
     transform: translate3D(0, 0, 0);
     transition:
-      transform @fs-navigation-offscreen-transition-speed @fs-navigation-offscreen-transition-timing,
-      visibility 0.001s @fs-navigation-offscreen-transition-timing;
+      transform var(--fs-navigation-offscreen-transition-duration) var(--fs-navigation-offscreen-transition-timing),
+      visibility 0.001s var(--fs-navigation-offscreen-transition-timing);
     visibility: visible;
   }
 
-  /**
-   * @class
-   * @name .fs-navigation-overlay-handle
-   * @type element
-   * @description Overlay handle
-   */
-  /**
-   * @class
-   * @name .fs-navigation-overlay-handle.fs-navigation-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
-
-  /**
-   * @class
-   * @name .fs-navigation-push-handle
-   * @type element
-   * @description Push handle
-   */
-  /**
-   * @class
-   * @name .fs-navigation-push-handle.fs-navigation-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
+  // Overlay, Push, Reveal handles
 
   &-push-handle&-enabled,
   &-overlay-handle&-enabled,
   &-reveal-handle&-enabled {
-    .fs_button;
-
     cursor: pointer;
     display: block;
   }
 
-  /**
-   * @class
-   * @name .fs-navigation-overlay-content:before
-   * @type element
-   * @description Overlay mask
-   */
-  /**
-   * @class
-   * @name .fs-navigation-overlay-content.fs-navigation-open:before
-   * @type modifier
-   * @description Indicates open state
-   */
+  // Overlay content
 
   &-overlay-content:before {
     width: 100%;
     height: 100%;
-    height: ~"calc(100% + 60px)";
+    height: ~'calc(100% + 60px)';
 
     position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: @fs-navigation-overlay-content-zindex;
+    z-index: var(--fs-navigation-overlay-content-zindex);
 
-    background: @fs-navigation-overlay-content-background;
-    background: fade(@fs-navigation-overlay-content-background, @fs-navigation-overlay-content-opacity);
+    background: var(--fs-navigation-overlay-content-background);
     content: '';
     display: block;
     opacity: 0;
     transition:
-      opacity @fs-navigation-offscreen-transition-speed @fs-navigation-offscreen-transition-timing,
-      visibility @fs-navigation-offscreen-transition-speed @fs-navigation-offscreen-transition-timing;
+      opacity var(--fs-navigation-offscreen-transition-duration) var(--fs-navigation-offscreen-transition-timing),
+      visibility var(--fs-navigation-offscreen-transition-duration) var(--fs-navigation-offscreen-transition-timing);
     visibility: hidden;
   }
 
   &-overlay-content&-open:before {
-    opacity: 1;
+    opacity: var(--fs-navigation-overlay-content-opacity);
     visibility: visible;
   }
-
-  /**
-   * @class
-   * @name .fs-navigation-push-content
-   * @type element
-   * @description Target page content
-   */
-  /**
-   * @class
-   * @name .fs-navigation-push-content.fs-navigation-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-push-content.fs-navigation-animated
-   * @type modifier
-   * @description Indicates animted state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-push-content.fs-navigation-open
-   * @type modifier
-   * @description Indicates open state
-   */
-
-  /**
-   * @class
-   * @name .fs-navigation-push-left-content
-   * @type modifier
-   * @description Indicates left hand nav
-   */
-  /**
-   * @class
-   * @name .fs-navigation-push-right-content
-   * @type modifier
-   * @description Indicates right hand nav
-   */
-
-  /**
-   * @class
-   * @name .fs-navigation-reveal-content
-   * @type element
-   * @description Target page content
-   */
-  /**
-   * @class
-   * @name .fs-navigation-reveal-content.fs-navigation-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-reveal-content.fs-navigation-animated
-   * @type modifier
-   * @description Indicates animted state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-reveal-content.fs-navigation-open
-   * @type modifier
-   * @description Indicates open state
-   */
-
-  /**
-   * @class
-   * @name .fs-navigation-reveal-left-content
-   * @type modifier
-   * @description Indicates left hand nav
-   */
-  /**
-   * @class
-   * @name .fs-navigation-reveal-right-content
-   * @type modifier
-   * @description Indicates right hand nav
-   */
 
   &-reveal-content&-enabled,
   &-push-content&-enabled {
     position: relative;
-    z-index: @fs-navigation-push-content-zindex;
+    z-index: var(--fs-navigation-push-content-zindex);
 
     display: block;
     overflow: hidden;
     transform: translate3D(0, 0, 0);
   }
 
+  // Reveal, Push Animated
+
   &-reveal-content&-animated,
   &-push-content&-animated {
     transition:
-      transform @fs-navigation-offscreen-transition-speed @fs-navigation-offscreen-transition-timing;
+      transform var(--fs-navigation-offscreen-transition-duration) var(--fs-navigation-offscreen-transition-timing);
   }
+
+  // Reveal, Push - Left, Right Enabled
 
   &-reveal-left-content&-enabled,
   &-push-left-content&-enabled {
@@ -501,47 +321,25 @@
 
   }
 
-  // open
+  // Reveal, Push Open
 
   &-reveal-left-content&-open,
   &-push-left-content&-open {
-    transform: translateX(@fs-navigation-offscreen-width);
+    transform: translateX(var(--fs-navigation-offscreen-width));
   }
 
   &-reveal-right-content&-open,
   &-push-right-content&-open {
-    transform: translateX(-(@fs-navigation-offscreen-width));
+    transform: ~'translateX( calc(var(--fs-navigation-offscreen-width) * -1) )';
   }
 
-  /**
-   * @class
-   * @name .fs-navigation-handle
-   * @type element
-   * @description Click target to toggle navigation
-   */
-  /**
-   * @class
-   * @name .fs-navigation-handle.fs-navigation-open
-   * @type modifier
-   * @description Indicates open state
-   */
-  /**
-   * @class
-   * @name .fs-navigation-handle.fs-navigation-enabled
-   * @type modifier
-   * @description Indicates enabled state
-   */
+  // Handle
 
   &-handle&-enabled {
-    .fs_button;
+
   }
 
-  /**
-   * @class
-   * @name .fs-navigation-lock
-   * @type modifier
-   * @description Indicates locked state; Applied to body element
-   */
+  // Lock
 
   &-lock {
     overflow: hidden !important;

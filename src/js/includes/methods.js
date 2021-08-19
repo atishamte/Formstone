@@ -1,5 +1,5 @@
-// Call an event manually on all the nodes
-u.prototype.trigger = function (events) {
+// Call an event manually on all the nodes; Modified to handle namespaced events
+u.prototype.trigger = u.prototype.fire = function (events) {
   var data = this.slice(arguments).slice(1);
 
   return this.eacharg(events, function (node, event) {
@@ -32,8 +32,8 @@ u.prototype.trigger = function (events) {
   });
 };
 
-// Attach a callback to the specified events
-u.prototype.bind = function (events, cb, cb2) {
+// Attach a callback to the specified events; Modified to handle namespaced events
+u.prototype.on = u.prototype.bind = function (events, cb, cb2) {
   var sel = null;
   var orig_callback = cb;
   if (typeof cb === 'string') {
@@ -98,8 +98,8 @@ u.prototype.bind = function (events, cb, cb2) {
   });
 };
 
-// Removes the callback to the event listener for each node
-u.prototype.unbind = function (events, cb, cb2) {
+// Removes the callback to the event listener for each node; Modified to handle namespaced events
+u.prototype.off = u.prototype.unbind = function (events, cb, cb2) {
   var cb_filter_off = (cb == null && cb2 == null);
   var sel = null;
   var cb_to_be_removed = cb;
@@ -145,15 +145,6 @@ u.prototype.unbind = function (events, cb, cb2) {
   });
 };
 
-// // Removes a class from all of the matched nodes
-// u.prototype.removeClass = function () {
-//   // Loop the combination of each node with each argument
-//   return this.eacharg(arguments, function (el, name) {
-//     // Remove the class using the native method
-//     el.classList.remove(name);
-//   });
-// };
-
 // Removes an attribute from all of the matched nodes
 u.prototype.removeAttr = function () {
   // Loop the combination of each node with each argument
@@ -163,6 +154,7 @@ u.prototype.removeAttr = function () {
   });
 };
 
+// Returns 'data-*' attributes (JSON decoded) or internally set data from first matched node
 u.prototype.getData = function(key) {
   // return this.eacharg(arguments, function (el, key) {
 
@@ -192,6 +184,7 @@ u.prototype.getData = function(key) {
   // });
 };
 
+// Set internal data on first matched node
 u.prototype.setData = function(key, data) {
   // console.log(this, arguments);
   // return this.eacharg(arguments, function (el, key, data) {
@@ -202,6 +195,7 @@ u.prototype.setData = function(key, data) {
   // });
 };
 
+// Delete internal data from first matched node
 u.prototype.deleteData = function(key) {
   // return this.eacharg(arguments, function (el, key) {
     var el = this.first();
