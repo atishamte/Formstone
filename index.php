@@ -30,6 +30,7 @@
     <script src="/dist/js/navigation.js"></script>
     <script src="/dist/js/swap.js"></script>
     <script src="/dist/js/tabs.js"></script>
+    <script src="/dist/js/touch.js"></script>
 
     <script src="/dist/js/jquery.js"></script>
 
@@ -188,6 +189,245 @@
   </head>
   <body class="fs-grid">
     <div class="demo_content">
+
+
+
+<script>
+  Formstone.onReady(function() {
+    var $targets = $(".touch"),
+      _minX = 0,
+      _minY = 0;
+
+/*
+    $(".swipe").touch({
+      swipe: true,
+      axis: x
+    }).on("swipe", function(e) {
+      $(this).html(e.directionX);
+    });
+*/
+
+    $targets.each(function() {
+      var $target = $(this),
+        data = {
+          $container: $target.parents(".container"),
+          $register:  $target.parents(".register")
+        };
+
+      $target.data("demo", data);
+    });
+
+    // Pan
+    $(".pan").touch({
+      pan: true
+    }).on("panstart.touch", function(e) {
+      // console.log('Pan Start', e);
+
+      var $target = $(this),
+        data = $target.data("demo"),
+        offset = data.$register.position();
+
+      data.origX = offset.left;
+      data.origY = offset.top;
+
+      data.diffWidth  = $target.outerWidth() / 2;
+      data.diffHeight = $target.outerHeight() / 2;
+    })
+    .on("panend.touch", function(e) {
+      // ...
+      // console.log('Pan End', e);
+    });
+
+    // Bubbling
+
+    $(document).on("pan.touch", ".pan", function(e) {
+      // console.log('Pan', e);
+
+      var $target = $(this),
+        data = $target.data("demo"),
+        x = data.origX + e.detail.deltaX,
+        y = data.origY + e.detail.deltaY,
+        minX = _minX + data.diffWidth,
+        minY = _minY + data.diffHeight,
+        maxX = data.$container.outerWidth()  - minX - 2,
+        maxY = data.$container.outerHeight() - minY - 2;
+
+      if (x < minX) {
+        x = minX;
+      }
+      if (x > maxX) {
+        x = maxX;
+      }
+      if (y < minY) {
+        y = minY;
+      }
+      if (y > maxY) {
+        y = maxY;
+      }
+
+      data.$register.css({
+        left: x,
+        top:  y
+      });
+    });
+
+    // Scale
+    $(".scale").touch({
+      scale: true
+    }).on("scalestart", function(e) {
+      var $target = $(this),
+        data = $target.data("demo"),
+        offset = $target.position();
+
+      data.origWidth  = $target.outerWidth();
+      data.origHeight = $target.outerHeight();
+    })
+    .on("scaleend", function(e) {
+      // ...
+    })
+    .on("scale", function(e) {
+      var $target = $(this),
+        data = $target.data("demo")
+        width  = data.origWidth  * e.detail.scale,
+        height = data.origHeight * e.detail.scale,
+        minWidth  = 150,
+        minHeight = 150,
+        maxH = data.$container.outerHeight(),
+        maxW = data.$container.outerWidth(),
+        maxWidth  = (maxH > maxW) ? maxW : maxH,
+        maxHeight = (maxH > maxW) ? maxW : maxH;
+
+      if (width < minWidth) {
+        width = minWidth;
+      }
+      if (width > maxWidth) {
+        width = maxWidth;
+      }
+
+      if (height < minHeight) {
+        height = minHeight;
+      }
+      if (height > maxHeight) {
+        height = maxHeight;
+      }
+
+      $target.css({
+        width:  width,
+        height: height,
+        lineHeight: height + "px",
+        left: -(width / 2),
+        top:  -(height / 2)
+      });
+    });
+
+    // Manipulate
+    $(".manipulate").touch({
+      pan: true,
+      scale: true
+    }).on("scalestart", function(e) {
+      var $target = $(this),
+        data = $target.data("demo"),
+        offset = data.$register.position();
+
+      data.origX = offset.left;
+      data.origY = offset.top;
+
+      data.origWidth  = $target.outerWidth();
+      data.origHeight = $target.outerHeight();
+    })
+    .on("scaleend", function(e) {
+      // ...
+    })
+    .on("scale", function(e) {
+      var $target = $(this),
+        data = $target.data("demo")
+        width  = data.origWidth  * e.detail.scale,
+        height = data.origHeight * e.detail.scale,
+        // pan
+        x = data.origX + e.detail.deltaX,
+        y = data.origY + e.detail.deltaY,
+        minX = _minX,
+        minY = _minY,
+        maxX = data.$container.outerWidth()  - minX,
+        maxY = data.$container.outerHeight() - minY,
+        // scale
+        minWidth  = 150,
+        minHeight = 150,
+        maxWidth = 600,
+        maxHeight = 600;
+
+      if (x < minX) {
+        x = minX;
+      }
+      if (x > maxX) {
+        x = maxX;
+      }
+      if (y < minY) {
+        y = minY;
+      }
+      if (y > maxY) {
+        y = maxY;
+      }
+
+      data.$register.css({
+        left: x,
+        top:  y
+      });
+
+      if (width < minWidth) {
+        width = minWidth;
+      }
+      if (width > maxWidth) {
+        width = maxWidth;
+      }
+
+      if (height < minHeight) {
+        height = minHeight;
+      }
+      if (height > maxHeight) {
+        height = maxHeight;
+      }
+
+      $target.css({
+        width:  width,
+        height: height,
+        lineHeight: height + "px",
+        left: -(width / 2),
+        top:  -(height / 2)
+      });
+    });
+  });
+</script>
+<style>
+  .box { background: #00bcd4; color: #fff; text-align: center; }
+
+  .container { background: #fff; border: 1px solid #455a64; height: 400px; margin: 20px 0; overflow: hidden; position: relative; width: 100%; }
+
+  .register { height: 1px; left: 50%; position: absolute; top: 50%; width: 1px; }
+  .box { height: 150px; line-height: 150px; left: -75px; position: absolute; top: -75px; width: 150px; }
+
+  .swipe { background: gray; height: 100px; width: 100%; }
+</style>
+
+<div class="container">
+  <div class="register">
+    <div class="box touch manipulate">Scale &amp; Pan</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="register">
+    <div class="box touch pan">Pan</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="register">
+    <div class="box touch scale">Scale</div>
+  </div>
+</div>
+
+
 
 <script>
   Formstone.onReady(function() {
@@ -954,6 +1194,7 @@ Formstone.onReady(function() {
   </nav>
 
 </div>
+
 
 
   </body>

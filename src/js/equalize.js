@@ -71,7 +71,7 @@
    */
 
   function eventspace(string) {
-    return string + '.' + namespace;
+    return string + '.' + Namespace;
   }
 
   /**

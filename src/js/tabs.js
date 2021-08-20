@@ -36,9 +36,9 @@
   };
 
   var Events = {
-    namespace: '.tabs',
-    click: 'click.tabs',
-    update: 'update.tabs',
+    namespace: eventspace(''),
+    click: eventspace('click'),
+    update: eventspace('update'),
     swap: {
       namespace: '.swap',
       activate: 'activate.swap',
@@ -70,6 +70,16 @@
   // function dotspace(string) {
   //   return '.' + srting;
   // }
+
+  /**
+   * @private
+   * @description Builds selector dotspace.
+   * @param {String} string - String to prefix
+   */
+
+  function eventspace(string) {
+    return string + '.' + Namespace;
+  }
 
   // Private
 

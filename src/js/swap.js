@@ -30,12 +30,12 @@
   };
 
   var Events = {
-    namespace: '.swap',
-    click: 'click.swap',
-    activate: 'activate.swap',
-    deactivate: 'deactivate.swap',
-    enable: 'enable.swap',
-    disable: 'disable.swap',
+    namespace: eventspace(''),
+    click: eventspace('click'),
+    activate: eventspace('activate'),
+    deactivate: eventspace('deactivate'),
+    enable: eventspace('enable'),
+    disable: eventspace('disable'),
   };
 
   // Internal
@@ -49,6 +49,26 @@
 
   function namespace(string, prefix) {
     return (prefix === false ? '' : 'fs-') + Namespace + (string !== '' ? '-' + string : '');
+  }
+
+  // /**
+  //  * @private
+  //  * @description Builds selector dotspace.
+  //  * @param {String} string - String to prefix
+  //  */
+
+  //  function dotspace(string) {
+  //   return '.' + string;
+  // }
+
+  /**
+   * @private
+   * @description Builds selector dotspace.
+   * @param {String} string - String to prefix
+   */
+
+  function eventspace(string) {
+    return string + '.' + Namespace;
   }
 
   // Private

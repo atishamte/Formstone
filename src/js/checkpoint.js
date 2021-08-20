@@ -37,10 +37,10 @@
   };
 
   var Events = {
-    namespace: '.checkpoint',
-    load: 'load.checkpoint',
-    activate: 'activate.checkpoint',
-    deactivate: 'deactivate.checkpoint',
+    namespace: eventspace(''),
+    load: eventspace('load'),
+    activate: eventspace('activate'),
+    deactivate: eventspace('deactivate'),
   };
 
   // Internal
@@ -64,6 +64,16 @@
 
   function dotspace(string) {
     return '.' + string;
+  }
+
+  /**
+   * @private
+   * @description Builds selector dotspace.
+   * @param {String} string - String to prefix
+   */
+
+  function eventspace(string) {
+    return string + '.' + Namespace;
   }
 
   /**

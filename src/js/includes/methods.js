@@ -9,10 +9,6 @@ u.prototype.trigger = u.prototype.fire = function (events) {
     var domEvent = parts.shift();
     var namespace = parts.join('.');
 
-    // if (namespace) {
-    //   data.namespace = namespace;
-    // }
-
     // Allow the event to bubble up and to be cancelable (as default)
     var opts = { bubbles: true, cancelable: true, detail: data };
 

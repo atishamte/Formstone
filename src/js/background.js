@@ -57,10 +57,10 @@
   }
 
   var Events = {
-    namespace: '.background',
-    load: 'load.background',
-    loaded: 'loaded.background',
-    error: 'error.background',
+    namespace: eventspace(''),
+    load: eventspace('load'),
+    loaded: eventspace('loaded'),
+    error: eventspace('error'),
   };
 
   // Internal
@@ -84,6 +84,16 @@
 
   function dotspace(string) {
     return '.' + string;
+  }
+
+  /**
+   * @private
+   * @description Builds selector dotspace.
+   * @param {String} string - String to prefix
+   */
+
+  function eventspace(string) {
+    return string + '.' + Namespace;
   }
 
   /**

@@ -53,13 +53,13 @@
   };
 
   var Events = {
-    namespace: '.navigation',
-    open: 'open.navigation',
-    close: 'close.navigation',
-    blur: 'blur.navigation',
-    focus: 'focus.navigation',
-    click: 'click.navigation',
-    keypress: 'keypress.navigation',
+    namespace: eventspace(''),
+    open: eventspace('open'),
+    close: eventspace('close'),
+    blur: eventspace('blur'),
+    focus: eventspace('focus'),
+    click: eventspace('click'),
+    keypress: eventspace('keypress'),
     swap: {
       namespace: '.swap',
       activate: 'activate.swap',
@@ -90,6 +90,16 @@
 
   function dotspace(string) {
     return '.' + string;
+  }
+
+  /**
+   * @private
+   * @description Builds selector dotspace.
+   * @param {String} string - String to prefix
+   */
+
+  function eventspace(string) {
+    return string + '.' + Namespace;
   }
 
   /**
