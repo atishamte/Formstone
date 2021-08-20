@@ -26,6 +26,7 @@
 
     <script src="/dist/js/background.js"></script>
     <script src="/dist/js/checkpoint.js"></script>
+    <script src="/dist/js/equalize.js"></script>
     <script src="/dist/js/navigation.js"></script>
     <script src="/dist/js/swap.js"></script>
     <script src="/dist/js/tabs.js"></script>
@@ -174,11 +175,98 @@
         --fs-navigation-offscreen-background: lightgray;
       }
 
+
+  .equalize_target { background: #CFD8DC; margin-bottom: 10px; padding: 15px; }
+  .equalize_target p { margin: 0; }
+  .equalize_child { background: #B0BEC5; }
+  .equalize_group { padding-bottom: 15px; }
+  .equalize_two { font-size: 12px; font-style: italic; }
+  .equalize img { max-width: 100%; }
+
     </style>
 
   </head>
   <body class="fs-grid">
     <div class="demo_content">
+
+<script>
+  Formstone.onReady(function() {
+    // Formstone('body').bind('hi.namespace', function() { console.log('hi'); });
+    // Formstone('body').bind('click.anotherspace', function() { console.log('another'); });
+
+    // Formstone('body').bind('click.namespace', function() {
+    //   console.log('BODY CLICK!', Formstone('body').first()._e);
+    // });
+
+
+    Formstone('.js-equalize').equalize();
+  });
+</script>
+
+
+    <div class="fs-row fs-all-align-start equalize js-equalize">
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec id elit non mi porta gravida at eget metus. Aenean lacinia bibendum nulla sed consectetur. Donec id elit non mi porta gravida at eget metus.</p>
+      </div>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Cras mattis consectetur purus sit amet fermentum.</p>
+      </div>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam quis risus eget urna mollis ornare vel eu leo. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+      </div>
+    </div>
+
+    <div class="fs-row fs-all-align-start equalize js-equalize" data-equalize-options='{"minWidth":"740px"}'>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Cras mattis consectetur purus sit amet fermentum.</p>
+      </div>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p>Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Cras mattis consectetur purus sit amet fermentum.</p>
+      </div>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam quis risus eget urna mollis ornare vel eu leo. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+      </div>
+    </div>
+
+    <div class="fs-row fs-all-align-start equalize js-equalize" data-equalize-options='{"target":".equalize_child"}'>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p class="equalize_child">Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Cras mattis consectetur purus sit amet fermentum.</p>
+      </div>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p class="equalize_child">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam quis risus eget urna mollis ornare vel eu leo. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+      </div>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p class="equalize_child">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec id elit non mi porta gravida at eget metus. Aenean lacinia bibendum nulla sed consectetur. Donec id elit non mi porta gravida at eget metus.</p>
+      </div>
+    </div>
+
+    <div class="fs-row fs-all-align-start equalize js-equalize" data-equalize-options='{"target":[".equalize_one",".equalize_two"]}'>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p class="equalize_one equalize_group">Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Cras mattis consectetur purus sit amet fermentum.</p>
+        <p class="equalize_two">Donec ullamcorper nulla non metus auctor fringilla.</p>
+      </div>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p class="equalize_one equalize_group">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam quis risus eget urna mollis ornare vel eu leo. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+        <p class="equalize_two">Nulla vitae elit libero, a pharetra augue.</p>
+      </div>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <p class="equalize_one equalize_group">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec id elit non mi porta gravida at eget metus. Aenean lacinia bibendum nulla sed consectetur. Donec id elit non mi porta gravida at eget metus.</p>
+        <p class="equalize_two">Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+      </div>
+    </div>
+
+    <div class="fs-row fs-all-align-start equalize js-equalize">
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <img src="https://spacehold.it/400x300/1.jpg" alt="">
+      </div>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <img src="https://spacehold.it/400x200/2.jpg" alt="">
+      </div>
+      <div class="fs-cell fs-sm-1 fs-md-2 fs-lg-4 equalize_target">
+        <img src="https://spacehold.it/400x400/3.jpg" alt="">
+      </div>
+    </div>
+
 
 
 <script>

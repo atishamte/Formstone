@@ -28,6 +28,10 @@ Formstone.isEmptyObject = function(obj) {
   return Formston.isObject(obj) && Object.keys(obj).length === 0;
 };
 
+Formstone.isArray = function(obj) {
+  return Formstone.type(obj) == 'array';
+};
+
 Formstone.extend = function() {
   var args = arguments;
   var deep = (args[0] === true);
@@ -105,4 +109,24 @@ Formstone.sortAsc = function(a, b) {
 
 Formstone.sortDesc = function(a, b) {
   return (parseInt(b, 10) - parseInt(a, 10));
+};
+
+// Timers
+
+Formstone.startTimer = function(timer, time, callback, interval) {
+  Formstone.clearTimer(timer);
+
+  return (interval) ? setInterval(callback, time) : setTimeout(callback, time);
+};
+
+Formstone.clearTimer = function(timer, interval) {
+  if (timer) {
+    if (interval) {
+      clearInterval(timer);
+    } else {
+      clearTimeout(timer);
+    }
+
+    timer = null;
+  }
 };

@@ -25,6 +25,7 @@
 
   var Initialized = false;
   var ResizeWatcher = new ResizeObserver(resize);
+  var ResizeTimer = null;
   var YouTubeReady = false;
   var YouTubeQueue = [];
   var $Instances = Formstone();
@@ -102,6 +103,15 @@
    */
 
   function resize() {
+    ResizeTimer = Formstone.startTimer(ResizeTimer, 20, _resize);
+  }
+
+  /**
+   * @private
+   * @description Handles debounced document resize.
+   */
+
+  function _resize() {
     $Instances.each(function(el, i) {
       resizeInstance.apply(el);
     });
@@ -885,6 +895,12 @@
   }
 
   /**
+   * @name resize
+   * @description Resizes target instance.
+   * @example Formstone('.target').background('resize');
+   */
+
+  /**
    * @private
    * @description Handles window resize event.
    */
@@ -906,12 +922,6 @@
       }
     }
   }
-
-  /**
-   * @name resize
-   * @description Resizes target instance.
-   * @example Formstone('.target').background('resize');
-   */
 
   /**
    * @private
@@ -973,6 +983,7 @@
     play: playVideo,
     mute: muteVideo,
     unmute: unmuteVideo,
+    resize: resizeInstance,
   });
 
   /**

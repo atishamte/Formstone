@@ -9,7 +9,7 @@
  * @requires core
  * @requires mediaquery
  * @requires swap
- * @example Formstone('.target').swap({ ... });
+ * @example Formstone('.target').tabs({ ... });
  */
 
  (function(window, Formstone) {
@@ -86,7 +86,7 @@
       return;
     }
 
-    GUID++
+    GUID++;
 
     data = Formstone.extend({
       guid: GUID,
@@ -339,7 +339,7 @@
   /**
    * @description Sets default options; applies to future instances.
    * @param {Object} options - Default options
-   * @example Formstone.swap('defaults', { ... });
+   * @example Formstone.tabs('defaults', { ... });
    */
 
   function defaults(options) {
@@ -349,7 +349,7 @@
   /**
    * @private
    * @description Tears down instance.
-   * @example Formstone.swap('destroy');
+   * @example Formstone.tabs('destroy');
    */
 
   function destroy() {
